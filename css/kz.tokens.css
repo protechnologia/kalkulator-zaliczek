@@ -1,0 +1,84 @@
+/* =========================================================
+   KALKULATOR-ZALICZEK — Tokeny projektowe i kontener bazowy
+
+   Paleta i język wizualny przeniesione z PV.SIM (industrialny,
+   jasny motyw, akcenty per moduł). Każdy moduł ma własny kolor:
+     01 Dane wejściowe  — teal
+     02 Cena ciepła     — amber
+     03 Metoda zaliczek — violet
+     04 Symulacja       — lime
+
+   Ładowany jako PIERWSZY arkusz CSS — pozostałe korzystają ze zmiennych.
+   ========================================================= */
+
+.kz {
+  --kz-bg-0: #ffffff;
+  --kz-bg-1: #f7f7f8;
+  --kz-bg-2: #ededf0;
+  --kz-bg-3: #e0e0e5;
+  --kz-border: #d4d4d8;
+  --kz-border-strong: #b4b4be;
+  --kz-text-0: #18181b;
+  --kz-text-1: #52525b;
+  --kz-text-2: #71717a;
+  --kz-text-3: #a1a1aa;
+  --kz-page-bg: #e8e8ec;
+  --kz-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.04);
+
+  --kz-orange: #ff7a1a;
+  --kz-orange-dim: rgba(255, 122, 26, 0.15);
+  --kz-teal: #2dd4bf;
+  --kz-teal-dim: rgba(45, 212, 191, 0.12);
+  --kz-amber: #f59e0b;
+  --kz-amber-dim: rgba(245, 158, 11, 0.12);
+  --kz-violet: #a78bfa;
+  --kz-violet-dim: rgba(167, 139, 250, 0.12);
+  --kz-sky: #38bdf8;
+  --kz-sky-dim: rgba(56, 189, 248, 0.12);
+  --kz-lime: #a3e635;
+  --kz-lime-dim: rgba(163, 230, 53, 0.12);
+  --kz-rose: #fb7185;
+  --kz-rose-dim: rgba(251, 113, 133, 0.12);
+  --kz-fuchsia: #e879f9;
+  --kz-fuchsia-dim: rgba(232, 121, 249, 0.12);
+
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--kz-bg-0);
+  color: var(--kz-text-0);
+  border: 1px solid var(--kz-border);
+  border-radius: 4px;
+  width: 95%;
+  margin: 0 auto;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+  box-shadow: var(--kz-shadow);
+}
+
+@media (min-width: 1100px) {
+  .kz {
+    width: auto;
+    margin-left: 16%;
+    margin-right: 2.5%;
+  }
+  body:has(#kz-toc.hidden) .kz { margin-left: 2.5%; }
+}
+
+/* decorative corner ticks — industrial signal */
+.kz::before, .kz::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--kz-teal);
+  pointer-events: none;
+}
+.kz::before {
+  top: 8px; left: 8px;
+  border-top: 1px solid; border-left: 1px solid;
+}
+.kz::after {
+  bottom: 8px; right: 8px;
+  border-bottom: 1px solid; border-right: 1px solid;
+}

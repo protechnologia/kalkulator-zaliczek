@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KALKULATOR ZALICZEK CO/CWU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/kz.tokens.css">
+<link rel="stylesheet" href="css/kz.layout.css">
+<link rel="stylesheet" href="css/kz.components.css">
+</head>
+<body style="background:#e8e8ec;margin:0;padding:24px;" id="kz-body">
+
+<div class="kz" id="kz">
+
+  <!-- HEADER -->
+  <div class="kz-header">
+    <div>
+      <div class="kz-brand">
+        <div class="kz-logo-dot"></div>
+        <div class="kz-title"><span class="accent">ZALICZKI</span>.CO/CWU</div>
+      </div>
+      <div class="kz-subtitle">Planowanie zaliczek · Spółdzielnia Mieszkaniowa Opole</div>
+    </div>
+    <div class="kz-meta">
+      v1.0.0
+    </div>
+  </div>
+
+  <!-- PASEK KONTEKSTU -->
+  <div class="kz-context">
+    <div style="flex:1">
+      <div class="kz-label">Stan kalkulatora</div>
+      <div class="kz-btn-row">
+        <button class="kz-btn teal" id="kz-export">Zapisz ↓</button>
+        <button class="kz-btn" id="kz-import">Wczytaj ↑</button>
+        <button class="kz-btn" id="kz-reset">Wyczyść</button>
+        <input type="file" id="kz-import-file" accept="application/json" style="display:none">
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODUŁ 01 — DANE WEJŚCIOWE ===== -->
+  <div class="kz-module-divider" id="mod-01">
+    <div class="dot"></div>
+    <div class="tag"><span class="num">01 //</span> Dane wejściowe</div>
+    <div class="rule"></div>
+  </div>
+
+  <div id="kz-m01-matrix"></div>
+
+  <!-- ===== MODUŁ 02 — SYMULACJA ZUŻYCIA ===== -->
+  <div class="kz-module-divider amber" id="mod-02">
+    <div class="dot"></div>
+    <div class="tag"><span class="num">02 //</span> Symulacja zużycia</div>
+    <div class="rule"></div>
+  </div>
+
+  <div class="kz-controls m02">
+    <div class="kz-controls-row three">
+      <div>
+        <div class="kz-label">Budynek</div>
+        <select class="kz-select" id="kz-m02-building"></select>
+      </div>
+      <div>
+        <div class="kz-label">Wielkość</div>
+        <select class="kz-select" id="kz-m02-metric">
+          <option value="co_int">CO — wskaźnik [GJ/m²]</option>
+          <option value="co_gj">CO — zużycie [GJ]</option>
+          <option value="co_cost">CO — koszt [zł]</option>
+          <option value="cwu_int">CWU — wskaźnik [GJ/m³]</option>
+          <option value="cwu_gj">CWU — zużycie [GJ]</option>
+          <option value="cwu_water">CWU — woda [m³]</option>
+          <option value="cwu_cost">CWU — koszt [zł]</option>
+          <option value="price">Cena ciepła [zł/GJ]</option>
+        </select>
+      </div>
+      <div>
+        <div class="kz-label">Sposób prognozy</div>
+        <select class="kz-select" id="kz-m02-method">
+          <option value="trend">Trend po analogicznych miesiącach</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="kz-chart-section m02">
+    <div class="kz-chart-header">
+      <div class="kz-chart-title">Zużycie <span class="ctx" id="kz-m02-ctx">—</span></div>
+    </div>
+    <div class="kz-chart-wrap"><svg class="kz-chart" id="kz-m02-chart" viewBox="0 0 780 270" preserveAspectRatio="none"></svg></div>
+  </div>
+
+  <!-- ===== MODUŁ 03 — ZALICZKI ===== -->
+  <div class="kz-module-divider violet" id="mod-03">
+    <div class="dot"></div>
+    <div class="tag"><span class="num">03 //</span> Zaliczki ustalone</div>
+    <div class="rule"></div>
+  </div>
+
+  <div id="kz-m03-matrix"></div>
+
+  <!-- ===== MODUŁ 04 — DOBÓR ZALICZEK ===== -->
+  <div class="kz-module-divider lime" id="mod-04">
+    <div class="dot"></div>
+    <div class="tag"><span class="num">04 //</span> Dobór zaliczek</div>
+    <div class="rule"></div>
+  </div>
+
+  <div class="kz-controls m04">
+    <div class="kz-controls-row three">
+      <div>
+        <div class="kz-label">Budynek</div>
+        <select class="kz-select" id="kz-m04-building"></select>
+      </div>
+      <div>
+        <div class="kz-label">Okres rozliczeniowy CO</div>
+        <div class="kz-toggle kz-m04-period" id="kz-m04-period-co">
+          <button class="kz-toggle-btn active" data-medium="CO" disabled>12 miesięcy (rok)</button>
+        </div>
+      </div>
+      <div>
+        <div class="kz-label">Okres rozliczeniowy CWU</div>
+        <div class="kz-toggle kz-m04-period" id="kz-m04-period-cwu">
+          <button class="kz-toggle-btn active" data-medium="CWU" disabled>6 miesięcy (półrocze)</button>
+        </div>
+      </div>
+    </div>
+    <div class="kz-controls-row">
+      <div style="flex:1">
+        <div class="kz-label">Na wykresie</div>
+        <select class="kz-select" id="kz-m04-view">
+          <option value="adv_co">Zebrane zaliczki — CO</option>
+          <option value="adv_cwu">Zebrane zaliczki — CWU</option>
+          <option value="rate_co">Stawki zaliczek — CO</option>
+          <option value="rate_cwu">Stawki zaliczek — CWU</option>
+          <option value="co">Koszt vs zaliczki — CO</option>
+          <option value="cwu">Koszt vs zaliczki — CWU</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="kz-chart-section">
+    <div class="kz-chart-header">
+      <div class="kz-chart-title"><span id="kz-m04-title">Narastająco: koszt ciepła vs zaliczki</span> <span class="ctx" id="kz-m04-ctx">—</span></div>
+    </div>
+    <div class="kz-chart-wrap"><svg class="kz-chart" id="kz-m04-chart" viewBox="0 0 780 300" preserveAspectRatio="none"></svg></div>
+    <div class="kz-legend" id="kz-m04-legend">
+      <span><i style="background:#f59e0b"></i> skumulowany koszt (fakt + prognoza)</span>
+      <span><i style="background:#a78bfa"></i> skumulowane zaliczki (ustalone + dobrane)</span>
+    </div>
+  </div>
+
+  <!-- Panele podsumowania ukryte na życzenie (zostawione jako wzór do przyszłych paneli) -->
+  <div class="kz-stats" style="display:none">
+    <div class="kz-stat amber cat-money"><div class="kz-stat-label">Koszt okresu</div><div class="kz-stat-value"><span id="kz-m04-cost">0</span><span class="unit">zł</span></div></div>
+    <div class="kz-stat violet cat-money"><div class="kz-stat-label">Suma zaliczek</div><div class="kz-stat-value"><span id="kz-m04-adv">0</span><span class="unit">zł</span></div></div>
+    <div class="kz-stat lime cat-money"><div class="kz-stat-label">Saldo (zaliczki − koszt)</div><div class="kz-stat-value"><span id="kz-m04-overshoot">0</span><span class="unit">zł</span></div></div>
+  </div>
+
+  <!-- LEWY TOC -->
+  <button class="kz-toc-toggle" id="kz-toc-toggle" aria-expanded="true">Moduły ▾</button>
+  <nav class="kz-toc" id="kz-toc">
+    <div class="kz-toc-title">Moduły</div>
+    <a href="#mod-01" class="kz-toc-item teal"><span class="dot"></span><span class="num">01</span><span class="lbl">Dane wejściowe</span></a>
+    <a href="#mod-02" class="kz-toc-item amber"><span class="dot"></span><span class="num">02</span><span class="lbl">Symulacja zużycia</span></a>
+    <a href="#mod-03" class="kz-toc-item violet"><span class="dot"></span><span class="num">03</span><span class="lbl">Zaliczki ustalone</span></a>
+    <a href="#mod-04" class="kz-toc-item lime"><span class="dot"></span><span class="num">04</span><span class="lbl">Dobór zaliczek</span></a>
+  </nav>
+
+  <!-- FOOTER -->
+  <div class="kz-footer">
+    <div class="status">EGIE.PL</div>
+    <div>KALKULATOR ZALICZEK · v1.0.0</div>
+  </div>
+
+</div>
+
+<script src="js/kz.config.js"></script>
+<script src="js/kz.data.js"></script>
+<script src="js/kz.estimate.js"></script>
+<script src="js/kz.persist.js"></script>
+<script src="js/kz.render.js"></script>
+<script src="js/kz.render.m01.js"></script>
+<script src="js/kz.render.m02.js"></script>
+<script src="js/kz.render.m03.js"></script>
+<script src="js/kz.render.m04.js"></script>
+<script src="js/kz.app.js"></script>
+</body>
+</html>

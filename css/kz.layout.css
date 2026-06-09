@@ -1,0 +1,193 @@
+/* =========================================================
+   KALKULATOR-ZALICZEK — Układ strony
+
+   Nagłówek, sekcje kontrolek, siatki, stopka, lewy spis treści
+   (TOC), prawy sidebar podsumowania oraz reguły responsywne.
+   ========================================================= */
+
+/* Wyłącz scroll anchoring przeglądarki — przy przerysowaniu zawartości (przełączniki,
+   przebudowa macierzy/wykresów) okno samoczynnie skakało, próbując utrzymać pozycję. */
+html, body { overflow-anchor: none; }
+* { overflow-anchor: none; }
+
+/* -------- HEADER -------- */
+.kz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 26px 28px 20px;
+  background: var(--kz-bg-1);
+  border-bottom: 1px solid var(--kz-border);
+}
+.kz-brand { display: flex; align-items: center; gap: 12px; }
+.kz-logo-dot {
+  width: 12px; height: 12px;
+  background: var(--kz-teal);
+  box-shadow: 0 0 12px var(--kz-teal);
+  border-radius: 1px;
+}
+.kz-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.kz-title .accent { color: var(--kz-teal); }
+.kz-subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--kz-text-2);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.kz-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--kz-text-2);
+  text-align: right;
+  text-transform: uppercase;
+  line-height: 1.7;
+}
+
+/* -------- GLOBALNY PASEK KONTEKSTU -------- */
+.kz-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 24px;
+  align-items: flex-end;
+  padding: 18px 28px;
+  background: var(--kz-bg-0);
+  border-bottom: 1px solid var(--kz-border);
+}
+.kz-context > div { min-width: 150px; }
+
+/* -------- LABEL -------- */
+.kz-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--kz-text-1);
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+}
+.kz-label::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--kz-teal);
+  margin-right: 7px;
+  flex: none;
+}
+
+/* -------- CONTROLS -------- */
+.kz-controls {
+  padding: 24px 28px;
+  background: var(--kz-bg-0);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.kz-controls-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+.kz-controls-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.kz-controls-row.four  { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+/* -------- FOOTER -------- */
+.kz-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: var(--kz-bg-1);
+  border-top: 1px solid var(--kz-border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--kz-text-2);
+  text-transform: uppercase;
+}
+.kz-footer .status { display: flex; align-items: center; gap: 8px; }
+.kz-footer .status::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--kz-lime);
+  box-shadow: 0 0 8px var(--kz-lime);
+}
+
+/* -------- TOC (lewy spis treści) -------- */
+.kz-toc {
+  position: fixed;
+  top: 24px; left: 0;
+  width: 14%;
+  max-width: 200px;
+  padding: 16px 14px;
+  background: var(--kz-bg-1);
+  border: 1px solid var(--kz-border);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  z-index: 40;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.kz-toc.hidden { display: none; }
+.kz-toc-title {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--kz-text-2);
+  margin: 14px 0 10px;
+}
+.kz-toc-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 6px;
+  text-decoration: none;
+  color: var(--kz-text-1);
+  font-size: 11px;
+  border-radius: 3px;
+  transition: background 0.15s, color 0.15s;
+}
+.kz-toc-item:hover { background: var(--kz-bg-3); color: var(--kz-text-0); }
+.kz-toc-item .dot { width: 6px; height: 6px; flex: none; border-radius: 1px; }
+.kz-toc-item .num { color: var(--kz-text-3); font-weight: 600; }
+.kz-toc-item.teal   .dot { background: var(--kz-teal); }
+.kz-toc-item.amber  .dot { background: var(--kz-amber); }
+.kz-toc-item.violet .dot { background: var(--kz-violet); }
+.kz-toc-item.lime   .dot { background: var(--kz-lime); }
+
+.kz-toc-toggle {
+  position: fixed;
+  top: 24px;
+  left: 8px;
+  z-index: 41;
+  appearance: none;
+  background: var(--kz-bg-2);
+  border: 1px solid var(--kz-border);
+  color: var(--kz-text-1);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  display: none;
+}
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 1099px) {
+  .kz-toc { display: none; }
+  .kz-toc.force-show { display: block; }
+  .kz-toc-toggle { display: block; }
+}
+@media (max-width: 720px) {
+  .kz-header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px; }
+  .kz-controls { padding: 18px; gap: 18px; }
+  .kz-controls-row, .kz-controls-row.three, .kz-controls-row.four { grid-template-columns: 1fr; gap: 18px; }
+  .kz-footer { padding: 12px 18px; }
+}

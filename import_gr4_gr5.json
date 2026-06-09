@@ -1,0 +1,1230 @@
+{
+  "app": "kalkulator-zaliczek",
+  "version": "1.0.0",
+  "savedAt": "2026-06-09T11:27:53.211Z",
+  "state": {
+    "medium": "CO",
+    "building": "GR-04",
+    "asOfYear": 2026,
+    "asOfMonth": 6,
+    "horizon": "current",
+    "periodStartCO": 1,
+    "periodStartCWU": 1,
+    "m01Cols": [
+      "GR-04",
+      "GR-05"
+    ],
+    "m01From": {
+      "year": 2024,
+      "month": 1
+    },
+    "m01To": {
+      "year": 2027,
+      "month": 12
+    },
+    "m02Metric": "co_gj",
+    "m02Building": "GR-04",
+    "m02Method": "trend",
+    "m04Building": "GR-04",
+    "m04View": "co"
+  },
+  "records": [
+    {
+      "id": "r1",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 1,
+      "gj": 219.84,
+      "qty": 3687.9
+    },
+    {
+      "id": "r2",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 1,
+      "gj": 52.07,
+      "qty": 170.84
+    },
+    {
+      "id": "r3",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 2,
+      "gj": 117.39,
+      "qty": 3687.9
+    },
+    {
+      "id": "r4",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 2,
+      "gj": 47.44,
+      "qty": 161.11
+    },
+    {
+      "id": "r5",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 3,
+      "gj": 99.31,
+      "qty": 3687.9
+    },
+    {
+      "id": "r6",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 3,
+      "gj": 51.5,
+      "qty": 181.13
+    },
+    {
+      "id": "r7",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 4,
+      "gj": 55.69,
+      "qty": 3687.9
+    },
+    {
+      "id": "r8",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 4,
+      "gj": 47.22,
+      "qty": 165.6
+    },
+    {
+      "id": "r9",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 5,
+      "gj": 9.65,
+      "qty": 3687.9
+    },
+    {
+      "id": "r10",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 5,
+      "gj": 44.52,
+      "qty": 158.51
+    },
+    {
+      "id": "r11",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 6,
+      "gj": 1.79,
+      "qty": 3687.9
+    },
+    {
+      "id": "r12",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 6,
+      "gj": 40.45,
+      "qty": 149.22
+    },
+    {
+      "id": "r13",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 7,
+      "gj": 1.32,
+      "qty": 3687.9
+    },
+    {
+      "id": "r14",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 7,
+      "gj": 37.63,
+      "qty": 134.12
+    },
+    {
+      "id": "r15",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 8,
+      "gj": 1.06,
+      "qty": 3687.9
+    },
+    {
+      "id": "r16",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 8,
+      "gj": 37.71,
+      "qty": 149.63
+    },
+    {
+      "id": "r17",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 9,
+      "gj": 10.48,
+      "qty": 3687.9
+    },
+    {
+      "id": "r18",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 9,
+      "gj": 39.71,
+      "qty": 147.07
+    },
+    {
+      "id": "r19",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 10,
+      "gj": 66.91,
+      "qty": 3687.9
+    },
+    {
+      "id": "r20",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 10,
+      "gj": 45.97,
+      "qty": 174.05
+    },
+    {
+      "id": "r21",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 11,
+      "gj": 155.83,
+      "qty": 3687.9
+    },
+    {
+      "id": "r22",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 11,
+      "gj": 48.62,
+      "qty": 172.07
+    },
+    {
+      "id": "r23",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2024,
+      "month": 12,
+      "gj": 187.06,
+      "qty": 3687.9
+    },
+    {
+      "id": "r24",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 12,
+      "gj": 53.49,
+      "qty": 186.11
+    },
+    {
+      "id": "r25",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 1,
+      "gj": 189.04,
+      "qty": 3687.9
+    },
+    {
+      "id": "r26",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 1,
+      "gj": 52.03,
+      "qty": 173.61
+    },
+    {
+      "id": "r27",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 2,
+      "gj": 186.26,
+      "qty": 3687.9
+    },
+    {
+      "id": "r28",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 2,
+      "gj": 48.21,
+      "qty": 153.86
+    },
+    {
+      "id": "r29",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 3,
+      "gj": 109.13,
+      "qty": 3687.9
+    },
+    {
+      "id": "r30",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 3,
+      "gj": 50.33,
+      "qty": 165
+    },
+    {
+      "id": "r31",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 4,
+      "gj": 40.09,
+      "qty": 3687.9
+    },
+    {
+      "id": "r32",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 4,
+      "gj": 48.28,
+      "qty": 173.67
+    },
+    {
+      "id": "r33",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 5,
+      "gj": 21.45,
+      "qty": 3687.9
+    },
+    {
+      "id": "r34",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 5,
+      "gj": 49.49,
+      "qty": 177.71
+    },
+    {
+      "id": "r35",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 6,
+      "gj": 0,
+      "qty": 3687.9
+    },
+    {
+      "id": "r36",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 6,
+      "gj": 46.17,
+      "qty": 154.28
+    },
+    {
+      "id": "r37",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 7,
+      "gj": 1.56,
+      "qty": 3687.9
+    },
+    {
+      "id": "r38",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 7,
+      "gj": 43.3,
+      "qty": 151.22
+    },
+    {
+      "id": "r39",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 8,
+      "gj": 1.6,
+      "qty": 3687.9
+    },
+    {
+      "id": "r40",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 8,
+      "gj": 41.99,
+      "qty": 150.13
+    },
+    {
+      "id": "r41",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 9,
+      "gj": 14.97,
+      "qty": 3687.9
+    },
+    {
+      "id": "r42",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 9,
+      "gj": 44.4,
+      "qty": 161.98
+    },
+    {
+      "id": "r43",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 10,
+      "gj": 100.17,
+      "qty": 3687.9
+    },
+    {
+      "id": "r44",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 10,
+      "gj": 49.45,
+      "qty": 178.93
+    },
+    {
+      "id": "r45",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 11,
+      "gj": 154.52,
+      "qty": 3687.9
+    },
+    {
+      "id": "r46",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 11,
+      "gj": 53.92,
+      "qty": 180.73
+    },
+    {
+      "id": "r47",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2025,
+      "month": 12,
+      "gj": 194.43,
+      "qty": 3687.9
+    },
+    {
+      "id": "r48",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 12,
+      "gj": 52.99,
+      "qty": 187.6
+    },
+    {
+      "id": "r49",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2026,
+      "month": 1,
+      "gj": 244.53,
+      "qty": 3687.9
+    },
+    {
+      "id": "r50",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 1,
+      "gj": 54.32,
+      "qty": 185.39
+    },
+    {
+      "id": "r51",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2026,
+      "month": 2,
+      "gj": 189.2,
+      "qty": 3687.9
+    },
+    {
+      "id": "r52",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 2,
+      "gj": 47.76,
+      "qty": 155.39
+    },
+    {
+      "id": "r53",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2026,
+      "month": 3,
+      "gj": 120.87,
+      "qty": 3687.9
+    },
+    {
+      "id": "r54",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 3,
+      "gj": 50.75,
+      "qty": 174.75
+    },
+    {
+      "id": "r55",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2026,
+      "month": 4,
+      "gj": 96.74,
+      "qty": 3687.9
+    },
+    {
+      "id": "r56",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 4,
+      "gj": 49.45,
+      "qty": 174.06
+    },
+    {
+      "id": "r57",
+      "building": "GR-04",
+      "medium": "CO",
+      "year": 2026,
+      "month": 5,
+      "gj": 33.48,
+      "qty": 3687.9
+    },
+    {
+      "id": "r58",
+      "building": "GR-04",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 5,
+      "gj": 47.8,
+      "qty": 171.04
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 1,
+      "gj": 238.66,
+      "qty": 4206.96,
+      "id": "r59"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 1,
+      "gj": 55,
+      "qty": 177.7,
+      "id": "r60"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 2,
+      "gj": 129.48,
+      "qty": 4206.96,
+      "id": "r61"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 2,
+      "gj": 49.18,
+      "qty": 165.7,
+      "id": "r62"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 3,
+      "gj": 105.82,
+      "qty": 4206.96,
+      "id": "r63"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 3,
+      "gj": 53.73,
+      "qty": 192.04,
+      "id": "r64"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 4,
+      "gj": 62.11,
+      "qty": 4206.96,
+      "id": "r65"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 4,
+      "gj": 49.22,
+      "qty": 173.49,
+      "id": "r66"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 5,
+      "gj": 8.99,
+      "qty": 4206.96,
+      "id": "r67"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 5,
+      "gj": 46.52,
+      "qty": 168.45,
+      "id": "r68"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 6,
+      "gj": 0,
+      "qty": 4206.96,
+      "id": "r69"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 6,
+      "gj": 42.4,
+      "qty": 156.26,
+      "id": "r70"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 7,
+      "gj": 0,
+      "qty": 4206.96,
+      "id": "r71"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 7,
+      "gj": 40.73,
+      "qty": 148.31,
+      "id": "r72"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 8,
+      "gj": 0.37,
+      "qty": 4206.96,
+      "id": "r73"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 8,
+      "gj": 39.73,
+      "qty": 152.05,
+      "id": "r74"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 9,
+      "gj": 9.04,
+      "qty": 4206.96,
+      "id": "r75"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 9,
+      "gj": 42.21,
+      "qty": 152.03,
+      "id": "r76"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 10,
+      "gj": 66.21,
+      "qty": 4206.96,
+      "id": "r77"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 10,
+      "gj": 47.43,
+      "qty": 170.42,
+      "id": "r78"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 11,
+      "gj": 165.01,
+      "qty": 4206.96,
+      "id": "r79"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 11,
+      "gj": 50,
+      "qty": 176.22,
+      "id": "r80"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2024,
+      "month": 12,
+      "gj": 198.76,
+      "qty": 4206.96,
+      "id": "r81"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2024,
+      "month": 12,
+      "gj": 55.17,
+      "qty": 196.99,
+      "id": "r82"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 1,
+      "gj": 202.52,
+      "qty": 4206.96,
+      "id": "r83"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 1,
+      "gj": 53.25,
+      "qty": 181.7,
+      "id": "r84"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 2,
+      "gj": 201.42,
+      "qty": 4206.96,
+      "id": "r85"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 2,
+      "gj": 49.5,
+      "qty": 171.16,
+      "id": "r86"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 3,
+      "gj": 125.61,
+      "qty": 4206.96,
+      "id": "r87"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 3,
+      "gj": 52.47,
+      "qty": 184.69,
+      "id": "r88"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 4,
+      "gj": 59.87,
+      "qty": 4206.96,
+      "id": "r89"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 4,
+      "gj": 48.88,
+      "qty": 176.94,
+      "id": "r90"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 5,
+      "gj": 44.45,
+      "qty": 4206.96,
+      "id": "r91"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 5,
+      "gj": 48.31,
+      "qty": 171.25,
+      "id": "r92"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 6,
+      "gj": 2.82,
+      "qty": 4206.96,
+      "id": "r93"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 6,
+      "gj": 44.13,
+      "qty": 158.56,
+      "id": "r94"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 7,
+      "gj": 2.82,
+      "qty": 4206.96,
+      "id": "r95"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 7,
+      "gj": 41.41,
+      "qty": 154.28,
+      "id": "r96"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 8,
+      "gj": 2.81,
+      "qty": 4206.96,
+      "id": "r97"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 8,
+      "gj": 42.06,
+      "qty": 165.79,
+      "id": "r98"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 9,
+      "gj": 15.93,
+      "qty": 4206.96,
+      "id": "r99"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 9,
+      "gj": 43.07,
+      "qty": 158.15,
+      "id": "r100"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 10,
+      "gj": 111.62,
+      "qty": 4206.96,
+      "id": "r101"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 10,
+      "gj": 47.97,
+      "qty": 184.84,
+      "id": "r102"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 11,
+      "gj": 172.27,
+      "qty": 4206.96,
+      "id": "r103"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 11,
+      "gj": 49.35,
+      "qty": 176.18,
+      "id": "r104"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2025,
+      "month": 12,
+      "gj": 210.7,
+      "qty": 4206.96,
+      "id": "r105"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2025,
+      "month": 12,
+      "gj": 57.97,
+      "qty": 189.2,
+      "id": "r106"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2026,
+      "month": 1,
+      "gj": 266.53,
+      "qty": 4206.96,
+      "id": "r107"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 1,
+      "gj": 56.56,
+      "qty": 171.96,
+      "id": "r108"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2026,
+      "month": 2,
+      "gj": 207.01,
+      "qty": 4206.96,
+      "id": "r109"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 2,
+      "gj": 50.65,
+      "qty": 158.55,
+      "id": "r110"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2026,
+      "month": 3,
+      "gj": 127.17,
+      "qty": 4206.96,
+      "id": "r111"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 3,
+      "gj": 54.34,
+      "qty": 178.07,
+      "id": "r112"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2026,
+      "month": 4,
+      "gj": 98.56,
+      "qty": 4206.96,
+      "id": "r113"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 4,
+      "gj": 52.68,
+      "qty": 173.84,
+      "id": "r114"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CO",
+      "year": 2026,
+      "month": 5,
+      "gj": 31.82,
+      "qty": 4206.96,
+      "id": "r115"
+    },
+    {
+      "building": "GR-05",
+      "medium": "CWU",
+      "year": 2026,
+      "month": 5,
+      "gj": 50.47,
+      "qty": 168.35,
+      "id": "r116"
+    }
+  ],
+  "prices": {
+    "2024-01": 129.97,
+    "2024-02": 125.79,
+    "2024-03": 125.79,
+    "2024-04": 125.79,
+    "2024-05": 125.79,
+    "2024-06": 125.79,
+    "2024-07": 125.79,
+    "2024-08": 125.79,
+    "2024-09": 125.79,
+    "2024-10": 125.79,
+    "2024-11": 125.79,
+    "2024-12": 125.79,
+    "2025-01": 125.79,
+    "2025-02": 125.79,
+    "2025-03": 126.69,
+    "2025-04": 126.69,
+    "2025-05": 126.69,
+    "2025-06": 126.69,
+    "2025-07": 123.92,
+    "2025-08": 123.92,
+    "2025-09": 123.92,
+    "2025-10": 123.92,
+    "2025-11": 123.92,
+    "2025-12": 123.92,
+    "2026-01": 127.39,
+    "2026-02": 127.39,
+    "2026-03": 127.39,
+    "2026-04": 127.39,
+    "2026-05": 127.39
+  },
+  "advances": {
+    "GR-04|CO|2024-01": 3.4,
+    "GR-04|CWU|2024-01": 38,
+    "GR-04|CO|2024-02": 3.4,
+    "GR-04|CWU|2024-02": 38,
+    "GR-04|CO|2024-03": 3.3,
+    "GR-04|CWU|2024-03": 37.5,
+    "GR-04|CO|2024-04": 3.3,
+    "GR-04|CWU|2024-04": 37.5,
+    "GR-04|CO|2024-05": 3.3,
+    "GR-04|CWU|2024-05": 37.5,
+    "GR-04|CO|2024-06": 3.3,
+    "GR-04|CWU|2024-06": 37.5,
+    "GR-04|CO|2024-07": 3.3,
+    "GR-04|CWU|2024-07": 37.5,
+    "GR-04|CO|2024-08": 3.3,
+    "GR-04|CWU|2024-08": 37.5,
+    "GR-04|CO|2024-09": 3.3,
+    "GR-04|CWU|2024-09": 37.5,
+    "GR-04|CO|2024-10": 3.3,
+    "GR-04|CWU|2024-10": 37.5,
+    "GR-04|CO|2024-11": 3.3,
+    "GR-04|CWU|2024-11": 37.5,
+    "GR-04|CO|2024-12": 3.3,
+    "GR-04|CWU|2024-12": 37.5,
+    "GR-04|CO|2025-01": 3.3,
+    "GR-04|CWU|2025-01": 37.5,
+    "GR-04|CO|2025-02": 3.3,
+    "GR-04|CWU|2025-02": 37.5,
+    "GR-04|CO|2025-03": 3.3,
+    "GR-04|CWU|2025-03": 37.5,
+    "GR-04|CO|2025-04": 3.3,
+    "GR-04|CWU|2025-04": 37.5,
+    "GR-04|CO|2025-05": 3.3,
+    "GR-04|CWU|2025-05": 37.5,
+    "GR-04|CO|2025-06": 3.3,
+    "GR-04|CWU|2025-06": 37.5,
+    "GR-04|CO|2025-07": 3.3,
+    "GR-04|CWU|2025-07": 37.5,
+    "GR-04|CO|2025-08": 3.3,
+    "GR-04|CWU|2025-08": 37.5,
+    "GR-04|CO|2025-09": 3.3,
+    "GR-04|CWU|2025-09": 37.5,
+    "GR-04|CO|2025-10": 3.3,
+    "GR-04|CWU|2025-10": 37.5,
+    "GR-04|CO|2025-11": 3.3,
+    "GR-04|CWU|2025-11": 37.5,
+    "GR-04|CO|2025-12": 3.3,
+    "GR-04|CWU|2025-12": 37.5,
+    "GR-04|CO|2026-01": 3.4,
+    "GR-04|CWU|2026-01": 38,
+    "GR-04|CO|2026-02": 3.4,
+    "GR-04|CWU|2026-02": 38,
+    "GR-04|CO|2026-03": 3.4,
+    "GR-04|CWU|2026-03": 38,
+    "GR-04|CO|2026-04": 3.4,
+    "GR-04|CWU|2026-04": 38,
+    "GR-04|CO|2026-05": 3.4,
+    "GR-04|CWU|2026-05": 38,
+    "GR-05|CO|2024-01": 3,
+    "GR-05|CWU|2024-01": 35,
+    "GR-05|CO|2024-02": 3,
+    "GR-05|CWU|2024-02": 35,
+    "GR-05|CO|2024-03": 2.95,
+    "GR-05|CWU|2024-03": 34.5,
+    "GR-05|CO|2024-04": 2.95,
+    "GR-05|CWU|2024-04": 34.5,
+    "GR-05|CO|2024-05": 2.95,
+    "GR-05|CWU|2024-05": 34.5,
+    "GR-05|CO|2024-06": 2.95,
+    "GR-05|CWU|2024-06": 34.5,
+    "GR-05|CO|2024-07": 2.95,
+    "GR-05|CWU|2024-07": 34.5,
+    "GR-05|CO|2024-08": 2.95,
+    "GR-05|CWU|2024-08": 34.5,
+    "GR-05|CO|2024-09": 2.95,
+    "GR-05|CWU|2024-09": 34.5,
+    "GR-05|CO|2024-10": 2.95,
+    "GR-05|CWU|2024-10": 34.5,
+    "GR-05|CO|2024-11": 2.95,
+    "GR-05|CWU|2024-11": 34.5,
+    "GR-05|CO|2024-12": 2.95,
+    "GR-05|CWU|2024-12": 34.5,
+    "GR-05|CO|2025-01": 2.95,
+    "GR-05|CWU|2025-01": 34.5,
+    "GR-05|CO|2025-02": 2.95,
+    "GR-05|CWU|2025-02": 34.5,
+    "GR-05|CO|2025-03": 2.95,
+    "GR-05|CWU|2025-03": 34.5,
+    "GR-05|CO|2025-04": 2.95,
+    "GR-05|CWU|2025-04": 34.5,
+    "GR-05|CO|2025-05": 2.95,
+    "GR-05|CWU|2025-05": 34.5,
+    "GR-05|CO|2025-06": 2.95,
+    "GR-05|CWU|2025-06": 34.5,
+    "GR-05|CO|2025-07": 2.95,
+    "GR-05|CWU|2025-07": 34.5,
+    "GR-05|CO|2025-08": 2.95,
+    "GR-05|CWU|2025-08": 34.5,
+    "GR-05|CO|2025-09": 2.95,
+    "GR-05|CWU|2025-09": 34.5,
+    "GR-05|CO|2025-10": 2.95,
+    "GR-05|CWU|2025-10": 34.5,
+    "GR-05|CO|2025-11": 2.95,
+    "GR-05|CWU|2025-11": 34.5,
+    "GR-05|CO|2025-12": 2.95,
+    "GR-05|CWU|2025-12": 34.5,
+    "GR-05|CO|2026-01": 3.05,
+    "GR-05|CWU|2026-01": 35.5,
+    "GR-05|CO|2026-02": 3.05,
+    "GR-05|CWU|2026-02": 35.5,
+    "GR-05|CO|2026-03": 3.05,
+    "GR-05|CWU|2026-03": 35.5,
+    "GR-05|CO|2026-04": 3.05,
+    "GR-05|CWU|2026-04": 35.5,
+    "GR-05|CO|2026-05": 3.05,
+    "GR-05|CWU|2026-05": 35.5
+  },
+  "areas": {
+    "GR-04": 3687.9,
+    "GR-05": 4206.96
+  }
+}
