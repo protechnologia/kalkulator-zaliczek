@@ -13,9 +13,22 @@ muszą leżeć obok pliku HTML.
 ## Struktura
 
 ```
-kalkulator-zaliczek.v0.1.html   strona główna (kolejność ładowania skryptów)
-css/  kz.tokens / kz.layout / kz.components
-js/   kz.config → data → estimate → persist → render → render.m01..m04 → app
+kalkulator-zaliczek.v0.1.html   strona główna (na końcu pliku — kolejność <script>)
+css/
+  kz.tokens.css                 zmienne (kolory, odstępy) — motyw jasny
+  kz.layout.css                 layout (nagłówek, moduły, kontrolki, stopka)
+  kz.components.css             komponenty (macierze, wykresy, przyciski)
+js/                             ładowane W TEJ kolejności (brak ES modules):
+  kz.config.js                  namespace KZ, stałe, P.state
+  kz.data.js                    magazyny records/prices/advances + CRUD
+  kz.estimate.js                prognoza zużycia, simulate(), metricMatrix()
+  kz.persist.js                 eksport/import JSON + autosave
+  kz.render.js                  wspólne helpery (formatery, szkielet SVG)
+  kz.render.m01.js              Moduł 01 — macierz danych
+  kz.render.m02.js              Moduł 02 — zużycie (8 wielkości)
+  kz.render.m03.js              Moduł 03 — macierz stawek zaliczek
+  kz.render.m04.js              Moduł 04 — dobór zaliczek
+  kz.app.js                     orkiestracja: update(), init(), listenery
 ```
 
 Wzorzec jak w PV.SIM: brak ES modules (Chrome blokuje `import/export` na
@@ -46,6 +59,12 @@ półrocze / 6 mies.).
    - 0 próbek → miesiąc pomijany (brak symulacji),
    - 1 próbka → trend płaski równy tej wartości,
    - ≥2 próbki → regresja liniowa względem **roku** i ekstrapolacja.
+
+   Dla **CWU** GJ można prognozować na dwa sposoby (przełącznik „Baza prognozy"
+   w Module 02, `state.cwuBasis`): `'intensity'` — `trend(GJ/m³) × trend(m³)`,
+   rozdzielający część fizyczną (energia na m³) od zachowania (zużycie wody)
+   (domyślnie), lub `'gj'` — trend wprost na GJ. Dla **CO** wybór jest bez
+   znaczenia (driver = stała powierzchnia, więc `trend(GJ/m²)×m² ≡ trend(GJ)`).
 2. **Koszt miesiąca** = zużycie_GJ × cena_GJ(rok, miesiąc). Cena bez wpisu
    dziedziczy ostatnią znaną wcześniejszą (carry-forward; ECO ogłasza taryfy
    z wyprzedzeniem — można je wpisać).
@@ -73,8 +92,9 @@ półrocze / 6 mies.).
   ogon po ostatniej wpisanej stawce.
 - **Zaliczka per budynek** (nie per lokal). Alokacja na lokale (CWU wg m³, CO wg m²)
   do dodania w kolejnej iteracji.
-- **Trend liczony na GJ** (nie na intensywności GJ/m²·m³); wskaźniki intensywności
-  są diagnostyczne (Moduł 02).
+- **Baza prognozy CWU:** domyślnie `'intensity'` (`trend(GJ/m³) × trend(m³)` — rozdziela
+  energię na m³ od zużycia wody); przełącznik „Baza prognozy" w Module 02 pozwala wrócić
+  do `'gj'` (trend wprost na GJ). Dla CO bez znaczenia (driver = stała powierzchnia).
 - **Trwałość:** główny mechanizm to eksport/import pliku JSON (Zapisz/Wczytaj/Wyczyść
   w górnym pasku); dodatkowo best-effort autosave w `localStorage`.
 

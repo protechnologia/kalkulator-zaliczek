@@ -80,6 +80,13 @@ window.KZ = window.KZ || {};
       m02Method.value = P.state.m02Method;
       m02Method.addEventListener('change', () => { P.state.m02Method = m02Method.value; P.renderM02(); P.autosave(); });
     }
+    // Baza prognozy CWU — zmienia forecastGJ dla CWU, więc wpływa na koszt i dobór
+    // zaliczek (M04). Pełny P.update(), nie tylko M02.
+    const m02Basis = document.getElementById('kz-m02-basis');
+    if (m02Basis) {
+      m02Basis.value = P.state.cwuBasis;
+      m02Basis.addEventListener('change', () => { P.state.cwuBasis = m02Basis.value; P.update(); P.autosave(); });
+    }
     // M02: hover na słupku → pokaż wartości WSZYSTKICH analogicznych miesięcy
     // (ten sam miesiąc kalendarzowy) + linię trendu prognozy. Delegacja na stabilnym
     // <svg> (przeżywa przerysowania przez innerHTML).

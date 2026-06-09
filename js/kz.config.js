@@ -87,6 +87,7 @@ window.KZ = window.KZ || {};
     m02Metric:   'co_int',           // wybrana wielkość z P.M02_METRICS (GJ/m², GJ, woda…)
     m02Building: null,               // budynek pokazywany na wykresie (własny wybór M02)
     m02Method:   'trend',            // metoda prognozy (na teraz tylko 'trend' — analogiczne miesiące)
+    cwuBasis:    'intensity',        // baza prognozy GJ dla CWU: 'intensity' = trend(GJ/m³) × trend(m³) (domyślnie) | 'gj' = trend GJ wprost. CO zawsze GJ (driver = stała powierzchnia)
 
     // --- Moduł 04 (dobór zaliczek) ---
     m04Building: null,               // budynek pokazywany na wykresie (własny wybór M04)

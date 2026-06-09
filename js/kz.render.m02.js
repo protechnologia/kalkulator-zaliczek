@@ -46,6 +46,12 @@ window.KZ = window.KZ || {};
     if (sel && sel.value !== metric.id) sel.value = metric.id;
     fillBuildingSelect();
 
+    // Baza prognozy to globalne ustawienie CWU (wpływa na koszt i dobór zaliczek
+    // w M04, niezależnie od tego, co pokazuje wykres M02) — zawsze aktywne.
+    // Dla CO i tak nic nie zmienia (driver = stała powierzchnia, trend GJ/m²×m² ≡ trend GJ).
+    const basis = document.getElementById('kz-m02-basis');
+    if (basis) basis.value = P.state.cwuBasis;
+
     const all = P.metricMatrix(metric);
     const series = all.series.find(s => s.building === b) || null;
     drawBars(all.months, series, metric);
@@ -65,8 +71,11 @@ window.KZ = window.KZ || {};
       return;
     }
 
+    // wskaźniki intensywności (GJ/m², GJ/m³) są małe → 3 miejsca po przecinku; reszta 2
+    const fmtV = metric.field === 'intensity' ? P.fmt.pl3 : P.fmt.pl2;
+
     const yMax = P._niceMax(peak, 1.12);
-    const fr = P._frame(yMax, 5, { padL: 56, fmtY: P.fmt.pl2, H: 270, padB: 40 });
+    const fr = P._frame(yMax, 5, { padL: 56, fmtY: fmtV, H: 270, padB: 40 });
     const slot = fr.cw / N;
     const gpad = Math.min(slot * 0.18, 10);
     const bw   = slot - 2 * gpad;
@@ -99,7 +108,7 @@ window.KZ = window.KZ || {};
       const bh = Math.max(0.5, y0 - by);
       const fcast = c.status === 'forecast';
       const vy = Math.max(by - 5, fr.padT + 9);
-      const title = `${P.MONTHS[w.month - 1].abbr} ${w.year} · ${P.fmt.pl2(c.value)} ${metric.unit}${fcast ? ' (prognoza)' : ''}`;
+      const title = `${P.MONTHS[w.month - 1].abbr} ${w.year} · ${fmtV(c.value)} ${metric.unit}${fcast ? ' (prognoza)' : ''}`;
       bars +=
         `<g class="kz-bar" data-month="${w.month}">` +
           `<rect x="${bx.toFixed(2)}" y="${by.toFixed(2)}" width="${Math.max(0.5, bw).toFixed(2)}" height="${bh.toFixed(2)}" ` +
@@ -108,7 +117,7 @@ window.KZ = window.KZ || {};
             `><title>${esc(title)}</title></rect>` +
           `<text class="kz-bar-val" data-month="${w.month}" x="${cx.toFixed(2)}" y="${vy.toFixed(2)}" text-anchor="middle" font-size="9" ` +
             `font-weight="600" fill="var(--kz-text-0)" stroke="var(--kz-bg-0)" stroke-width="3" paint-order="stroke">` +
-            `${P.fmt.pl2(c.value)}</text>` +
+            `${fmtV(c.value)}</text>` +
         `</g>`;
     });
 

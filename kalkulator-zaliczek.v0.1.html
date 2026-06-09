@@ -59,7 +59,7 @@
   </div>
 
   <div class="kz-controls m02">
-    <div class="kz-controls-row three">
+    <div class="kz-controls-row four">
       <div>
         <div class="kz-label">Budynek</div>
         <select class="kz-select" id="kz-m02-building"></select>
@@ -80,7 +80,14 @@
       <div>
         <div class="kz-label">Sposób prognozy</div>
         <select class="kz-select" id="kz-m02-method">
-          <option value="trend">Trend po analogicznych miesiącach</option>
+          <option value="trend">Trend per miesiąc</option>
+        </select>
+      </div>
+      <div>
+        <div class="kz-label">Baza prognozy (CWU)</div>
+        <select class="kz-select" id="kz-m02-basis">
+          <option value="intensity">GJ/m³ i m³</option>
+          <option value="gj">GJ i m³</option>
         </select>
       </div>
     </div>
@@ -110,10 +117,21 @@
   </div>
 
   <div class="kz-controls m04">
-    <div class="kz-controls-row three">
+    <div class="kz-controls-row four">
       <div>
         <div class="kz-label">Budynek</div>
         <select class="kz-select" id="kz-m04-building"></select>
+      </div>
+      <div>
+        <div class="kz-label">Na wykresie</div>
+        <select class="kz-select" id="kz-m04-view">
+          <option value="adv_co">Zebrane zaliczki — CO [zł/msc]</option>
+          <option value="adv_cwu">Zebrane zaliczki — CWU [zł/msc]</option>
+          <option value="rate_co">Stawki zaliczek — CO [zł/m²]</option>
+          <option value="rate_cwu">Stawki zaliczek — CWU [zł/m³]</option>
+          <option value="co">Koszt vs zaliczki — CO [zł]</option>
+          <option value="cwu">Koszt vs zaliczki — CWU [zł]</option>
+        </select>
       </div>
       <div>
         <div class="kz-label">Okres rozliczeniowy CO</div>
@@ -126,19 +144,6 @@
         <div class="kz-toggle kz-m04-period" id="kz-m04-period-cwu">
           <button class="kz-toggle-btn active" data-medium="CWU" disabled>6 miesięcy (półrocze)</button>
         </div>
-      </div>
-    </div>
-    <div class="kz-controls-row">
-      <div style="flex:1">
-        <div class="kz-label">Na wykresie</div>
-        <select class="kz-select" id="kz-m04-view">
-          <option value="adv_co">Zebrane zaliczki — CO</option>
-          <option value="adv_cwu">Zebrane zaliczki — CWU</option>
-          <option value="rate_co">Stawki zaliczek — CO</option>
-          <option value="rate_cwu">Stawki zaliczek — CWU</option>
-          <option value="co">Koszt vs zaliczki — CO</option>
-          <option value="cwu">Koszt vs zaliczki — CWU</option>
-        </select>
       </div>
     </div>
   </div>

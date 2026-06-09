@@ -45,7 +45,30 @@ window.KZ = window.KZ || {};
     return { value: v, method, n: samples.length };
   }
 
-  P.forecastGJ  = (b, med, monthId, year) => forecastField(b, med, monthId, year, 'gj');
+  // Prognoza WSKAŹNIKA CWU (GJ/m³) — trend energii na 1 m³ wody. Wielkość fizycznie
+  // stabilna (energia podgrzania m³), więc ekstrapoluje się łagodniej niż samo GJ.
+  // Próbki z qty<=0 pomijane (brak sensownego wskaźnika). Zwraca { value, n } lub null.
+  function forecastIntensity(building, medium, monthId, targetYear) {
+    const pts = P.monthSamples(building, medium, monthId)
+      .filter(s => s.qty > 0)
+      .map(s => ({ x: s.year, y: s.gj / s.qty }));
+    if (pts.length === 0) return null;
+    const t = linearTrend(pts);
+    return { value: Math.max(0, t.f(targetYear)), n: pts.length };
+  }
+
+  // Prognoza GJ. Dla CO (oraz CWU przy bazie 'gj') — trend wprost na GJ.
+  // Dla CWU przy bazie 'intensity' — GJ = prognoza(GJ/m³) × prognoza(m³): rozdziela
+  // część fizyczną (wskaźnik) od zachowania (zużycie wody), co stabilizuje ekstrapolację.
+  P.forecastGJ = function(b, med, monthId, year) {
+    if (med === 'CWU' && P.state.cwuBasis === 'intensity') {
+      const fi = forecastIntensity(b, med, monthId, year);
+      const fq = forecastField(b, med, monthId, year, 'qty');
+      if (!fi || !fq) return null;
+      return { value: Math.max(0, fi.value * fq.value), method: `wskaźnik×woda (${fi.n})`, n: fi.n };
+    }
+    return forecastField(b, med, monthId, year, 'gj');
+  };
   P.forecastQty = (b, med, monthId, year) => forecastField(b, med, monthId, year, 'qty');
 
   // Pojedyncza komórka miesiąca: fakt (jest rekord) albo prognoza albo brak.

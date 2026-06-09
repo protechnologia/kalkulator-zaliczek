@@ -16,6 +16,7 @@ window.KZ = window.KZ || {};
     pl0: n => Math.round(n || 0).toLocaleString('pl-PL'),
     pl1: n => (n || 0).toLocaleString('pl-PL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
     pl2: n => (n || 0).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    pl3: n => (n || 0).toLocaleString('pl-PL', { minimumFractionDigits: 3, maximumFractionDigits: 3 }),
     zl:  n => (n || 0).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' zł',
   };
 
