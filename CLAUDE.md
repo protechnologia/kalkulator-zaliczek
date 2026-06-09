@@ -10,7 +10,7 @@ serwera i bez frameworka**, uruchamiany bezpośrednio z `file://`.
 
 ## Uruchomienie i testowanie
 
-- Otwórz [kalkulator-zaliczek.v0.1.html](kalkulator-zaliczek.v0.1.html) w przeglądarce — to wszystko. Brak buildu, brak `npm`, brak dependencji.
+- Otwórz [kalkulator-zaliczek.v1.0.html](kalkulator-zaliczek.v1.0.html) w przeglądarce — to wszystko. Brak buildu, brak `npm`, brak dependencji.
 - Foldery `css/` i `js/` muszą leżeć obok pliku HTML.
 - Brak testów automatycznych i lintera — weryfikacja jest ręczna w przeglądarce (DevTools console).
 
@@ -96,4 +96,4 @@ Górny pasek kontekstu zredukowany do przycisków stanu (Zapisz/Wczytaj/Wyczyś�
 
 ## Uwaga o wersji
 
-Wersja `1.0.0` jest zapisana w trzech miejscach, które trzeba synchronizować przy bumpie: `P.VERSION` w [js/kz.config.js](js/kz.config.js), nagłówek/stopka w [kalkulator-zaliczek.v0.1.html](kalkulator-zaliczek.v0.1.html) oraz tytuł w README. (Nazwa pliku HTML pozostaje `…v0.1.html` — niezmieniana, by nie psuć linków/zakładek.)
+Wersja `1.0.0` jest zapisana w **czterech** miejscach, które trzeba synchronizować przy bumpie: `P.VERSION` w [js/kz.config.js](js/kz.config.js), nagłówek/stopka w [kalkulator-zaliczek.v1.0.html](kalkulator-zaliczek.v1.0.html), tytuł w README oraz **nazwa pliku HTML** (`…v1.0.html` — odzwierciedla wersję `major.minor`; przy bumpie zmienić nazwę i wszystkie linki do niej w README/CLAUDE). Uwaga: zmiana nazwy łamie istniejące zakładki/linki do starej nazwy.

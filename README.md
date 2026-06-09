@@ -7,13 +7,13 @@ wizualny przeniesione z PV.SIM.
 
 ## Uruchomienie
 
-Otwórz `kalkulator-zaliczek.v0.1.html` w przeglądarce. Folder `css/` i `js/`
+Otwórz `kalkulator-zaliczek.v1.0.html` w przeglądarce. Folder `css/` i `js/`
 muszą leżeć obok pliku HTML.
 
 ## Struktura
 
 ```
-kalkulator-zaliczek.v0.1.html   strona główna (na końcu pliku — kolejność <script>)
+kalkulator-zaliczek.v1.0.html   strona główna (na końcu pliku — kolejność <script>)
 css/
   kz.tokens.css                 zmienne (kolory, odstępy) — motyw jasny
   kz.layout.css                 layout (nagłówek, moduły, kontrolki, stopka)
