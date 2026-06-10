@@ -4,7 +4,7 @@
    Tworzy globalny namespace window.KZ (alias Z w plikach modułów).
    Definiuje miesiące, stałe oraz P.state — jedyne źródło prawdy UI.
 
-   Wzorzec architektoniczny (jak PV.SIM): brak ES modules
+   Wzorzec architektoniczny: brak ES modules
    (Chrome blokuje import/export na file://), zamiast tego IIFE +
    window.KZ. Sztywna kolejność ładowania:
      config → data → estimate → persist → render → render.mXX → app

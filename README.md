@@ -1,24 +1,39 @@
 # Kalkulator zaliczek CO/CWU — v1.0.0
 
 Planowanie miesięcznych zaliczek na centralne ogrzewanie (CO) i ciepłą wodę
-użytkową (CWU) dla budynków spółdzielni mieszkaniowej. Czysty HTML/CSS/JS,
-uruchamiany z `file://` (bez serwera, bez frameworka) — architektura i język
-wizualny przeniesione z PV.SIM.
+użytkową (CWU) dla budynków spółdzielni mieszkaniowej. Uruchamiany z `file://`
+(bez serwera, bez frameworka).
 
 ## Uruchomienie
 
 Otwórz `kalkulator-zaliczek.v1.0.html` w przeglądarce. Folder `css/` i `js/`
 muszą leżeć obok pliku HTML.
 
+## Architektura
+
+- **Czysty HTML/CSS/JS** — bez buildu, bez `npm`, bez frameworka i bez zewnętrznych
+  bibliotek JS. Wykresy to ręcznie generowany SVG; jedyna zależność zewnętrzna to
+  font z Google Fonts (kosmetyka). Całość działa offline, prosto z dysku.
+- **Brak ES modules** (Chrome blokuje `import/export` na `file://`) — zamiast tego
+  każdy plik JS to IIFE rozszerzające jeden wspólny namespace `window.KZ`. Skrypty
+  ładują się w **sztywnej kolejności** (`config → data → estimate → persist →
+  render → render.mXX → app`; zob. koniec pliku HTML).
+- **Jedno źródło prawdy UI** — `KZ.state` trzyma wyłącznie ustawienia interfejsu;
+  dane domenowe leżą osobno w magazynach `records`/`prices`/`advances`/`areas`,
+  dzięki czemu łatwo serializują się do JSON.
+- **Przepływ danych** — każda zmiana w UI woła `KZ.update()`, które przelicza
+  symulację i renderuje wszystkie moduły. Listenery podpięte przez delegację
+  zdarzeń na stabilnych kontenerach (tabele przerysowywane przez `innerHTML`).
+
 ## Struktura
 
 ```
-kalkulator-zaliczek.v1.0.html   strona główna (na końcu pliku — kolejność <script>)
-css/
-  kz.tokens.css                 zmienne (kolory, odstępy) — motyw jasny
-  kz.layout.css                 layout (nagłówek, moduły, kontrolki, stopka)
+css/                            kolejność ładowania w HTML: tokens → layout → components
   kz.components.css             komponenty (macierze, wykresy, przyciski)
-js/                             ładowane W TEJ kolejności (brak ES modules):
+  kz.layout.css                 layout (nagłówek, moduły, kontrolki, stopka)
+  kz.tokens.css                 zmienne (kolory, odstępy) — motyw jasny
+js/                             kolejność ładowania w HTML: config → data → estimate → persist → render → render.mXX → app
+  kz.app.js                     orkiestracja: update(), init(), listenery
   kz.config.js                  namespace KZ, stałe, P.state
   kz.data.js                    magazyny records/prices/advances + CRUD
   kz.estimate.js                prognoza zużycia, simulate(), metricMatrix()
@@ -28,25 +43,72 @@ js/                             ładowane W TEJ kolejności (brak ES modules):
   kz.render.m02.js              Moduł 02 — zużycie (8 wielkości)
   kz.render.m03.js              Moduł 03 — macierz stawek zaliczek
   kz.render.m04.js              Moduł 04 — dobór zaliczek
-  kz.app.js                     orkiestracja: update(), init(), listenery
+docs/
+  screenshot.png               zrzut ekranu (sekcja na końcu)
+import/
+  import_gr4_gr5.json          przykładowe dane (budynki GR-04/GR-05) do wczytania
+CLAUDE.md                        wskazówki dla Claude Code przy edycji repo
+kalkulator-zaliczek.v1.0.html   strona główna (na końcu pliku — kolejność <script>)
+README.md                        ten plik
 ```
-
-Wzorzec jak w PV.SIM: brak ES modules (Chrome blokuje `import/export` na
-`file://`), zamiast tego IIFE + jeden namespace `window.KZ`. Każda zmiana w UI
-woła `KZ.update()`, które przelicza symulację i renderuje wszystkie moduły.
 
 ## Model danych (serializowany do JSON)
 
-- `KZ.records`  — `{id, building, medium, year, month, gj, qty}`; `qty` = m² (CO) lub m³ (CWU)
-- `KZ.prices`   — `"RRRR-MM" → zł/GJ` (wspólne dla wszystkich budynków, dostawca ECO)
-- `KZ.advances` — `"budynek|medium|RRRR-MM" → stawka jednostkowa` (CO: zł/m², CWU: zł/m³; wpisana w Module 03 lub dobrana przez `simulate`)
-- `KZ.areas`    — `"budynek" → m²` (powierzchnia, jedna na budynek; synchronizowana z `qty` rekordów CO)
+Przykładowy plik (skrócony — po jednym wpisie na magazyn):
 
-Moduł 01 to **macierz**: wiersze = miesiące, kolumny = budynki; w każdej komórce
-GJ‑CO, GJ‑CWU i m³ wody, a powierzchnia jest w nagłówku kolumny. Jawny układ
-(kolumny i zakres miesięcy) trzymany jest w `state.m01Cols / m01From / m01To`,
-co pozwala dokładać puste budynki i miesiące. Pod spodem dane nadal żyją w
-`records[]`, więc Moduły 02–04 działają bez zmian.
+```jsonc
+{
+  // pomiary zużycia, po jednym na budynek×medium×miesiąc
+  "records": [
+    {
+      "id": "GR-04|CO|2023|1",          // klucz: budynek|medium|rok|miesiąc
+      "building": "GR-04",              // identyfikator budynku
+      "medium": "CO",                   // CO = ogrzewanie, CWU = ciepła woda
+      "year": 2023,                     // rok pomiaru
+      "month": 1,                       // miesiąc pomiaru (1–12)
+      "gj": 152.4,                      // zużyta energia [GJ]
+      "qty": 3120                       // CO: powierzchnia [m²]
+    },
+    {
+      "id": "GR-04|CWU|2023|1",         // klucz: budynek|medium|rok|miesiąc
+      "building": "GR-04",              // identyfikator budynku
+      "medium": "CWU",                  // CO = ogrzewanie, CWU = ciepła woda
+      "year": 2023,                     // rok pomiaru
+      "month": 1,                       // miesiąc pomiaru (1–12)
+      "gj": 38.7,                       // zużyta energia [GJ]
+      "qty": 410                        // CWU: zużycie wody [m³]
+    }
+  ],
+  // cena ciepła [zł/GJ], klucz "RRRR-MM" (wspólna dla budynków)
+  "prices": {
+    "2023-01": 78.5                     // styczeń 2023 [zł/GJ]
+  },
+  // stawki jednostkowe zaliczek, klucz "budynek|medium|RRRR-MM"
+  "advances": {
+    "GR-04|CO|2023-01": 1.85,           // CO [zł/m²]
+    "GR-04|CWU|2023-01": 22.4           // CWU [zł/m³]
+  },
+  // powierzchnia budynku [m²] (sync z qty rekordów CO)
+  "areas": {
+    "GR-04": 3120                       // GR-04 [m²]
+  }
+}
+```
+
+Dane wprowadza się w Module 01 jako **tabelę**: wiersze to kolejne miesiące,
+kolumny to budynki. W każdej komórce podaje się trzy liczby — GJ‑CO, GJ‑CWU i m³
+wody — które trafiają do magazynu `records`, a powierzchnię budynku (m²) wpisuje
+się raz, w nagłówku jego kolumny, skąd zasila magazyn `areas`. Tabelę można
+dowolnie rozszerzać: dodawać puste budynki i miesiące.
+
+Pozostałe dwa magazyny wypełnia się gdzie indziej. **Cena ciepła** (`prices`)
+jest jedna na miesiąc — wspólna dla wszystkich budynków — więc wpisuje się ją
+raz na wiersz, również w Module 01. **Stawki zaliczek ustalonych** (`advances`)
+podaje się w Module 03, w tabeli o tym samym układzie co Moduł 01 (wiersze =
+miesiące, kolumny = budynki): w każdej komórce stawka jednostkowa CO [zł/m²]
+i CWU [zł/m³]. To te stawki, których kalkulator **nie zmienia** — traktuje je
+jako narzucone z góry i dobiera tylko brakujący „ogon" późniejszych miesięcy
+(Moduł 04).
 
 ## Algorytm zaliczek
 
@@ -102,3 +164,7 @@ półrocze / 6 mies.).
 
 Alokacja na poszczególne lokale, wybór wielu metod estymacji (jest jedna: trend),
 margines bezpieczeństwa (%). Wszystko łatwe do dołożenia w architekturze KZ.
+
+## Zrzut ekranu
+
+![Zrzut ekranu kalkulatora zaliczek](docs/screenshot.png)
