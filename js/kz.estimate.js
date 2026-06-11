@@ -226,6 +226,22 @@ window.KZ = window.KZ || {};
     return { value, method: `sygnatura HDD (${fit.n} mies.)`, n: fit.n };
   }
 
+  // Temperatura zakładana przez prognozę HDD [°C] — odwrócenie tej samej
+  // aproksymacji miesięcznej: T = tBase − HDD/liczba_dni. Pokazuje na wykresie
+  // M02 (metryka 'temp') założenie pogodowe stojące za sygnaturą (klimatologia
+  // × trend klimatu × percentyl surowości zimy). Null gdy metoda CO ≠ 'hdd',
+  // bez klimatologii albo poza sezonem grzewczym (maj–wrz zostaje puste
+  // CELOWO: fallback trendem per miesiąc nie zakłada żadnej temperatury,
+  // więc słupek sugerowałby zależność, której nie ma).
+  P.tempForecast = function(y, m) {
+    if (P.state.m02Method !== 'hdd') return null;
+    const city = activeCity();
+    if (!city) return null;
+    const hdd = hddForecast(y, m, city);
+    if (hdd == null) return null;
+    return city.tBase - hdd / daysInMonth(y, m);
+  };
+
   // Prognoza GJ. Dla CO — trend wprost na GJ albo sygnatura energetyczna
   // (state.m02Method === 'hdd'; miesiące letnie i przypadki bez danych
   // spadają na trend). Dla CWU przy bazie 'gj' — trend wprost na GJ;
@@ -418,7 +434,8 @@ window.KZ = window.KZ || {};
   //   'qty'       → zużycie wody [m³] (sensowne dla CWU)
   //   'cost'      → koszt [zł] = GJ × cena ciepła
   //   'price'     → cena ciepła [zł/GJ] — globalna z P.prices, niezależna od budynku
-  //   'temp'      → temperatura zewn. [°C] — globalna z P.temps; może być ≤ 0, bez prognozy
+  //   'temp'      → temperatura zewn. [°C] — globalna z P.temps; może być ≤ 0; prognoza
+  //                 „ogona" tylko przy metodzie 'hdd' (paź–kwi, zob. P.tempForecast)
   // Dla każdej komórki: 'actual' (jest rekord), 'forecast' (pusty „ogon" po ostatnim
   // miesiącu z danymi, o ile da się policzyć trend) albo 'none' (brak / luka w środku).
   // Zwraca { months, buildings, series:[{ building, color, cells:[{year,month,status,value,gj,qty}] }], peak }.
@@ -450,9 +467,15 @@ window.KZ = window.KZ || {};
         }
         // Temperatura zewnętrzna też jest globalna; w odróżnieniu od ceny
         // 0 i wartości ujemne są poprawnymi pomiarami (brak wpisu = null).
+        // W „ogonie" przy metodzie 'hdd' pokazujemy temperaturę zakładaną
+        // przez sygnaturę (paź–kwi; maj–wrz i luki w historii zostają puste).
         if (field === 'temp') {
           const t = P.getTemp(w.year, w.month);
           if (t != null) { if (t > peak) peak = t; return { year: w.year, month: w.month, status: 'actual', value: t, gj: 0, qty: 0 }; }
+          if (lastAbs != null && P.absM(w.year, w.month) > lastAbs) {
+            const tf = P.tempForecast(w.year, w.month);
+            if (tf != null) { if (tf > peak) peak = tf; return { year: w.year, month: w.month, status: 'forecast', value: tf, gj: 0, qty: 0 }; }
+          }
           return { year: w.year, month: w.month, status: 'none', value: 0, gj: 0, qty: 0 };
         }
         const rec = P.getRecord(b, medium, w.year, w.month);
@@ -491,7 +514,7 @@ window.KZ = window.KZ || {};
   // przechodzącej przez analogiczne miesiące. Zwraca liczbę lub null (brak próbek).
   P.metricTrendValue = function(metric, building, monthId, year) {
     if (metric.field === 'price') { const p = P.getPrice(year, monthId); return p > 0 ? p : null; }
-    if (metric.field === 'temp')  { return P.getTemp(year, monthId); }
+    if (metric.field === 'temp')  { const t = P.getTemp(year, monthId); return t != null ? t : P.tempForecast(year, monthId); }
     const isCO = metric.medium === 'CO';
     const fg = P.forecastGJ(building, metric.medium, monthId, year);
     const fq = P.forecastQty(building, metric.medium, monthId, year);

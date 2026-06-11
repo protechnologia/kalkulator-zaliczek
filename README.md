@@ -149,7 +149,10 @@ liczy się z tego samego miesiąca kalendarzowego w poprzednich latach:
   obejmuje więc tylko paź–kwi, ale **prognoza i zaliczki obejmują cały rok**:
   majowe dogrzewanie czy letnie straty na instalacji (w danych realnie
   1–30 GJ) liczą się trendem z analogicznych miesięcy i normalnie wchodzą
-  do kosztów oraz doboru stawek.
+  do kosztów oraz doboru stawek. Założenie pogodowe widać wprost na wykresie:
+  metryka „Temperatura zewn." pokazuje w prognozowanym „ogonie" temperatury
+  wynikające z klimatologii i percentyla (tylko paź–kwi; maj–wrz zostaje
+  puste, bo trend per miesiąc nie zakłada żadnej temperatury).
 
 ### CWU (`state.cwuBasis`)
 

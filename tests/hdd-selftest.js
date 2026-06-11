@@ -10,7 +10,9 @@
      3. kwantyl liniowo interpolowany (percentyl surowości zimy),
      4. sanity wygenerowanej klimatologii (js/kz.climate.js),
      5. ścieżka end-to-end: rekordy + temperatury → fitSignature →
-        P.forecastGJ (jawna temperatura ma pierwszeństwo, lato → trend).
+        P.forecastGJ (jawna temperatura ma pierwszeństwo, lato → trend),
+     6. P.tempForecast — temperatura zakładana przez sygnaturę (odwrócenie
+        HDD; maj–wrz i metoda 'trend' → null).
 
    Wynik: PASS/FAIL per test; exit code ≠ 0 przy jakiejkolwiek porażce.
    ========================================================= */
@@ -123,10 +125,26 @@ check('e2e: prognoza z lutego (klimatologia) > 0 sygnaturą',
 // lato poza sezonem grzewczym → fallback na trend per miesiąc (brak próbek lipca → null)
 check('e2e: lipiec → fallback (brak próbek → null)', P.forecastGJ('TEST', 'CO', 7, 2026) === null);
 
+// ---------- 6. Prognoza temperatury (odwrócenie HDD) ----------
+// jawna temperatura → odwrócenie musi ją odtworzyć co do wartości
+const tjan = P.tempForecast(2026, 1);
+check('temp: styczeń (jawna −2 °C) → −2', tjan != null && near(tjan, -2, 0.001), `t=${tjan}`);
+// klimatologia P80 → zima chłodniejsza niż typowa, ale w fizycznym zakresie
+const tfeb = P.tempForecast(2026, 2);
+check('temp: luty (klimatologia P80) w zakresie −25…10 °C', tfeb != null && tfeb > -25 && tfeb < 10, `t=${tfeb}`);
+// percentyl surowszy → temperatura niższa (monotoniczność względem P)
+P.state.m02HddP = 50;
+const tfeb50 = P.tempForecast(2026, 2);
+P.state.m02HddP = 80;
+check('temp: P80 chłodniej niż P50', tfeb50 != null && tfeb < tfeb50, `P80=${tfeb}, P50=${tfeb50}`);
+// maj–wrz: poza klimatologią → null (fallback trendem nie zakłada temperatury)
+check('temp: lipiec → null (poza sezonem)', P.tempForecast(2026, 7) === null);
+
 // przełączenie na 'trend' → sygnatura nieaktywna
 P.state.m02Method = 'trend';
 const ftr = P.forecastGJ('TEST', 'CO', 1, 2026);
 check('e2e: metoda trend → bez sygnatury', !!ftr && !ftr.method.includes('sygnatura'), ftr && ftr.method);
+check('temp: metoda trend → null', P.tempForecast(2026, 2) === null);
 
 // ---------- wynik ----------
 console.log(failed ? `\n${failed} TEST(ÓW) NIE PRZESZŁO` : '\nWSZYSTKIE TESTY PRZESZŁY');

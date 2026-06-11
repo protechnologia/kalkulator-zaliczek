@@ -54,7 +54,8 @@ window.KZ = window.KZ || {};
   //   field 'qty'       → zużycie wody [m³] (tylko CWU)
   //   field 'cost'      → koszt [zł] = GJ × cena ciepła
   //   field 'price'     → cena ciepła [zł/GJ] — globalna z P.prices, niezależna od budynku
-  //   field 'temp'      → temperatura zewn. [°C] — globalna z P.temps; może być ≤ 0, bez prognozy „ogona"
+  //   field 'temp'      → temperatura zewn. [°C] — globalna z P.temps; może być ≤ 0; prognoza „ogona"
+  //                       tylko przy metodzie CO 'hdd' (paź–kwi z odwrócenia HDD, maj–wrz puste)
   P.M02_METRICS = [
     { id: 'co_int',    medium: 'CO',  field: 'intensity', label: 'CO — wskaźnik',  unit: 'GJ/m²' },
     { id: 'co_gj',     medium: 'CO',  field: 'gj',        label: 'CO — zużycie',   unit: 'GJ'    },

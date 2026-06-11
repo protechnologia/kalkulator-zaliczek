@@ -5,7 +5,9 @@
    Select #kz-m02-metric wybiera jedną z 9 wielkości P.M02_METRICS
    (zob. config.js): wskaźniki GJ/m² / GJ/m³, zużycia GJ, woda m³,
    koszty zł, cena ciepła zł/GJ, temperatura zewn. °C (może być ≤ 0 —
-   oś z yMin, słupki w dół od wyróżnionej linii zera, bez prognozy).
+   oś z yMin, słupki w dół od wyróżnionej linii zera; prognoza „ogona"
+   tylko przy metodzie CO 'hdd': temperatura zakładana przez sygnaturę,
+   paź–kwi z odwrócenia HDD, maj–wrz celowo puste — zob. P.tempForecast).
    Oś X = miesiące (zakres M01), jeden słupek na miesiąc.
    Miesiące prognozowane (pusty „ogon" po ostatnim miesiącu z danymi)
    rysowane są jaśniej i z przerywanym obrysem (+ kreska „prognoza →").
