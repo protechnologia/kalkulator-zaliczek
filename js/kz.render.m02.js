@@ -11,8 +11,12 @@
    rysowane są jaśniej i z przerywanym obrysem (+ kreska „prognoza →").
 
    Sposób prognozy wybierany osobno per medium (zob. estimate.js):
-     • CO  — #kz-m02-method-co  (state.m02Method; na teraz tylko trend
-             po analogicznych miesiącach)
+     • CO  — #kz-m02-method-co  (state.m02Method: 'trend' = po
+             analogicznych miesiącach, 'hdd' = sygnatura energetyczna
+             E = a + b·HDD + c·t; przy 'hdd' aktywne są też selecty
+             miasta klimatologii #kz-m02-city i percentyla surowości
+             zimy #kz-m02-hdd-p, a linia kontekstu pokazuje
+             diagnostykę dopasowania: a/b/c, R², liczbę miesięcy)
      • CWU — #kz-m02-method-cwu (state.cwuBasis: 'intensity' =
              trend(GJ/m³) × trend(m³), 'gj' = trend wprost na GJ)
    ========================================================= */
@@ -52,18 +56,47 @@ window.KZ = window.KZ || {};
     if (sel && sel.value !== metric.id) sel.value = metric.id;
     fillBuildingSelect();
 
-    // Sposób prognozy CWU to globalne ustawienie (wpływa na koszt i dobór zaliczek
-    // w M04, niezależnie od tego, co pokazuje wykres M02) — zawsze aktywny.
+    // Sposoby prognozy to globalne ustawienia (wpływają na koszt i dobór zaliczek
+    // w M04, niezależnie od tego, co pokazuje wykres M02) — zawsze aktywne.
+    const methodCO = document.getElementById('kz-m02-method-co');
+    if (methodCO) methodCO.value = P.state.m02Method;
     const methodCWU = document.getElementById('kz-m02-method-cwu');
     if (methodCWU) methodCWU.value = P.state.cwuBasis;
+    fillHddControls();
 
     const all = P.metricMatrix(metric);
     const series = all.series.find(s => s.building === b) || null;
     drawBars(all.months, series, metric);
 
     const ctx = document.getElementById('kz-m02-ctx');
-    if (ctx) ctx.textContent = b ? `— ${b} · ${metric.label} [${metric.unit}]` : '— brak budynku';
+    if (ctx) ctx.textContent = (b ? `— ${b} · ${metric.label} [${metric.unit}]` : '— brak budynku') + signatureInfo(b);
   };
+
+  // Selecty parametrów sygnatury HDD: miasto (opcje z P.CLIMATE — dodanie miasta
+  // nie wymaga edycji HTML) i percentyl surowości zimy; wygaszone poza metodą 'hdd'.
+  function fillHddControls() {
+    const active = P.state.m02Method === 'hdd';
+    const city = document.getElementById('kz-m02-city');
+    if (city) {
+      const ids = Object.keys(P.CLIMATE || {});
+      if (!ids.includes(P.state.hddCity) && ids.length) P.state.hddCity = ids[0];
+      city.innerHTML = ids.length
+        ? ids.map(id => `<option value="${esc(id)}" ${id === P.state.hddCity ? 'selected' : ''}>${esc(P.CLIMATE[id].name)}</option>`).join('')
+        : `<option value="">— brak klimatologii —</option>`;
+      city.disabled = !active;
+    }
+    const pSel = document.getElementById('kz-m02-hdd-p');
+    if (pSel) { pSel.value = String(P.state.m02HddP); pSel.disabled = !active; }
+  }
+
+  // Diagnostyka dopasowania sygnatury w linii kontekstu (tylko przy metodzie 'hdd').
+  function signatureInfo(b) {
+    if (P.state.m02Method !== 'hdd' || !b) return '';
+    const fit = P.fitSignature(b);
+    if (!fit) return ' · sygnatura HDD: za mało danych (prognoza CO trendem)';
+    const c = fit.c !== 0 ? `, c=${P.fmt.pl1(fit.c)} GJ/sezon` : '';
+    return ` · sygnatura HDD: a=${P.fmt.pl1(fit.a)} GJ, b=${P.fmt.pl3(fit.b)} GJ/°D${c}, R²=${P.fmt.pl2(fit.r2)}, ${fit.n} mies./${fit.nSeasons} sez.`;
+  }
 
   function drawBars(months, series, metric) {
     const svg = document.getElementById('kz-m02-chart');

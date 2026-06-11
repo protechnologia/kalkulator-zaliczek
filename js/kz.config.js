@@ -7,7 +7,7 @@
    Wzorzec architektoniczny: brak ES modules
    (Chrome blokuje import/export na file://), zamiast tego IIFE +
    window.KZ. Sztywna kolejność ładowania:
-     config → data → estimate → persist → render → render.mXX → app
+     config → climate → data → estimate → persist → render → render.mXX → app
 
    Ładowany jako PIERWSZY plik JS.
    ========================================================= */
@@ -15,7 +15,7 @@ window.KZ = window.KZ || {};
 (function(P) {
   'use strict';
 
-  P.VERSION = '1.0.0';
+  P.VERSION = '1.1.0';
 
   // 1 GJ = 277.78 kWh (stała fizyczna, gdyby była potrzebna do przeliczeń)
   P.KWH_PER_GJ = 1000 / 3.6;
@@ -90,8 +90,10 @@ window.KZ = window.KZ || {};
     // --- Moduł 02 (symulacja zużycia) ---
     m02Metric:   'co_int',           // wybrana wielkość z P.M02_METRICS (GJ/m², GJ, woda…)
     m02Building: null,               // budynek pokazywany na wykresie (własny wybór M02)
-    m02Method:   'trend',            // sposób prognozy CO (select #kz-m02-method-co; na teraz tylko 'trend' — analogiczne miesiące)
+    m02Method:   'trend',            // sposób prognozy CO (select #kz-m02-method-co): 'trend' = analogiczne miesiące | 'hdd' = sygnatura energetyczna (E = a + b·HDD + c·t)
     cwuBasis:    'intensity',        // sposób prognozy CWU (select #kz-m02-method-cwu): 'intensity' = trend(GJ/m³) × trend(m³) (domyślnie) | 'gj' = trend GJ wprost
+    hddCity:     'opole',            // miasto klimatologii HDD (klucz w P.CLIMATE; select #kz-m02-city; używane tylko przy m02Method 'hdd')
+    m02HddP:     80,                 // percentyl surowości zimy dla prognozy HDD (select #kz-m02-hdd-p: 50|70|80|90; na sumach sezonowych)
 
     // --- Moduł 04 (dobór zaliczek) ---
     m04Building: null,               // budynek pokazywany na wykresie (własny wybór M04)

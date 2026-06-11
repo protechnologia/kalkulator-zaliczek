@@ -75,19 +75,23 @@ window.KZ = window.KZ || {};
       m02Metric.value = P.state.m02Metric;
       m02Metric.addEventListener('change', () => { P.state.m02Metric = m02Metric.value; P.renderM02(); P.autosave(); });
     }
-    // Sposób prognozy CO (state.m02Method — na teraz tylko 'trend')
+    // Sposoby prognozy zmieniają P.forecastGJ, więc wpływają na koszt i dobór
+    // zaliczek (M04) — pełny P.update(), nie tylko M02. Dotyczy to też miasta
+    // klimatologii i percentyla surowości zimy (parametry sygnatury HDD).
     const m02MethodCO = document.getElementById('kz-m02-method-co');
     if (m02MethodCO) {
       m02MethodCO.value = P.state.m02Method;
-      m02MethodCO.addEventListener('change', () => { P.state.m02Method = m02MethodCO.value; P.renderM02(); P.autosave(); });
+      m02MethodCO.addEventListener('change', () => { P.state.m02Method = m02MethodCO.value; P.update(); P.autosave(); });
     }
-    // Sposób prognozy CWU (state.cwuBasis) — zmienia forecastGJ dla CWU, więc wpływa
-    // na koszt i dobór zaliczek (M04). Pełny P.update(), nie tylko M02.
     const m02MethodCWU = document.getElementById('kz-m02-method-cwu');
     if (m02MethodCWU) {
       m02MethodCWU.value = P.state.cwuBasis;
       m02MethodCWU.addEventListener('change', () => { P.state.cwuBasis = m02MethodCWU.value; P.update(); P.autosave(); });
     }
+    const m02City = document.getElementById('kz-m02-city');
+    if (m02City) m02City.addEventListener('change', () => { P.state.hddCity = m02City.value; P.update(); P.autosave(); });
+    const m02HddP = document.getElementById('kz-m02-hdd-p');
+    if (m02HddP) m02HddP.addEventListener('change', () => { P.state.m02HddP = +m02HddP.value; P.update(); P.autosave(); });
     // M02: hover na słupku → pokaż wartości WSZYSTKICH analogicznych miesięcy
     // (ten sam miesiąc kalendarzowy) + linię trendu prognozy. Delegacja na stabilnym
     // <svg> (przeżywa przerysowania przez innerHTML).
@@ -178,7 +182,7 @@ window.KZ = window.KZ || {};
       if (!fileIn.files[0]) return;
       P.importJSON(fileIn.files[0], err => {
         if (err) { alert('Błąd wczytywania: ' + err.message); return; }
-        // odśwież kontrolki z wczytanego stanu
+        // odśwież kontrolki z wczytanego stanu (miasto/percentyl HDD hydratuje renderM02)
         if (m02Metric) m02Metric.value = P.state.m02Metric;
         if (m02MethodCO)  m02MethodCO.value = P.state.m02Method;
         if (m02MethodCWU) m02MethodCWU.value = P.state.cwuBasis;

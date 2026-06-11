@@ -25,7 +25,7 @@
       <div class="kz-subtitle">Planowanie zaliczek · Spółdzielnia Mieszkaniowa Opole</div>
     </div>
     <div class="kz-meta">
-      v1.0.0
+      v1.1.0
     </div>
   </div>
 
@@ -82,6 +82,7 @@
         <div class="kz-label">Sposób prognozy CO</div>
         <select class="kz-select" id="kz-m02-method-co">
           <option value="trend">Trend per miesiąc (GJ)</option>
+          <option value="hdd">Sygnatura energetyczna (HDD)</option>
         </select>
       </div>
       <div>
@@ -89,6 +90,22 @@
         <select class="kz-select" id="kz-m02-method-cwu">
           <option value="intensity">Trend per miesiąc (GJ/m³ i m³)</option>
           <option value="gj">Trend per miesiąc (GJ i m³)</option>
+        </select>
+      </div>
+    </div>
+    <!-- parametry sygnatury HDD — aktywne tylko przy prognozie CO 'hdd' -->
+    <div class="kz-controls-row four">
+      <div>
+        <div class="kz-label">Klimat (miasto)</div>
+        <select class="kz-select" id="kz-m02-city"></select>
+      </div>
+      <div>
+        <div class="kz-label">Surowość zimy (percentyl HDD)</div>
+        <select class="kz-select" id="kz-m02-hdd-p">
+          <option value="50">P50 — mediana</option>
+          <option value="70">P70 — chłodniej niż zwykle</option>
+          <option value="80">P80 — zalecany margines</option>
+          <option value="90">P90 — ostrożny</option>
         </select>
       </div>
     </div>
@@ -180,12 +197,13 @@
   <!-- FOOTER -->
   <div class="kz-footer">
     <div class="status">EGIE.PL</div>
-    <div>KALKULATOR ZALICZEK · v1.0.0</div>
+    <div>KALKULATOR ZALICZEK · v1.1.0</div>
   </div>
 
 </div>
 
 <script src="js/kz.config.js"></script>
+<script src="js/kz.climate.js"></script>
 <script src="js/kz.data.js"></script>
 <script src="js/kz.estimate.js"></script>
 <script src="js/kz.persist.js"></script>

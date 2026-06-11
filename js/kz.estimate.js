@@ -9,6 +9,17 @@
      • ≥2 próbki → regresja liniowa względem ROKU, ekstrapolacja
    Koszt miesiąca = prognoza_GJ × cena_GJ(rok,mies.).
 
+   Dla CO dostępny jest też drugi sposób (state.m02Method === 'hdd'):
+   SYGNATURA ENERGETYCZNA budynku z korektą pogodową —
+     E_m = a + b·HDD_m + c·t
+   (a = składnik stały [GJ], b = czułość na chłód [GJ/stopniodzień],
+   c = trend roczny [GJ/sezon], t = numer sezonu grzewczego). Jedna
+   wspólna regresja OLS na wszystkich miesiącach grzewczych historii;
+   HDD przyszłości z klimatologii miasta (P.CLIMATE, kz.climate.js)
+   z korektą trendu klimatu i percentylem surowości zimy. Przy braku
+   warunków (mało danych, miesiąc poza sezonem, brak temperatur)
+   metoda spada na trend per miesiąc.
+
    Zaliczki (Moduł 03) wpisuje się RĘCZNIE jako stawki jednostkowe:
      CO  → zł/m² (mnożone przez powierzchnię budynku)
      CWU → zł/m³ (mnożone przez zużycie wody danego miesiąca)
@@ -57,10 +68,174 @@ window.KZ = window.KZ || {};
     return { value: Math.max(0, t.f(targetYear)), n: pts.length };
   }
 
-  // Prognoza GJ. Dla CO (oraz CWU przy bazie 'gj') — trend wprost na GJ.
-  // Dla CWU przy bazie 'intensity' — GJ = prognoza(GJ/m³) × prognoza(m³): rozdziela
+  // ===== SYGNATURA ENERGETYCZNA CO (sposób prognozy 'hdd') =====
+  //
+  // Wszystko liczone PO MIESIĄCACH (nie po dobach) — tą samą aproksymacją,
+  // którą wygenerowano klimatologię w kz.climate.js, więc błąd przybliżenia
+  // znosi się między uczeniem a prognozą.
+
+  const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
+
+  // Sezon grzewczy = paź–kwi, identyfikowany rokiem października
+  // (styczeń 2024 → sezon 2023). Maj–wrzesień → null (poza sezonem).
+  // Null NIE wyklucza miesiąca z prognozy ani zaliczek: zużycie CO poza
+  // sezonem (dogrzewanie w maju/wrześniu, letnie straty i cyrkulacja —
+  // w danych realnie 1–30 GJ) prognozuje fallback trendem per miesiąc,
+  // a jego koszt normalnie wchodzi do simulate() i doboru stawek (M04).
+  // Z UCZENIA sygnatury te miesiące są wykluczone celowo: ich zużycie nie
+  // zależy od pogody (HDD≈0), więc psułoby regresję E = a + b·HDD.
+  // Ten sam zakres paź–kwi: HEATING_MONTHS w tools/hdd-climate.js.
+  function seasonOf(y, m) {
+    if (m >= 10) return y;
+    if (m <= 4) return y - 1;
+    return null;
+  }
+
+  // Klimatologia aktywnego miasta (state.hddCity) albo null, gdy brak danych.
+  function activeCity() {
+    const c = P.CLIMATE || {};
+    return c[P.state.hddCity] || null;
+  }
+
+  // HDD miesiąca z JAWNEJ temperatury użytkownika (P.temps, bez carry-forward);
+  // null gdy brak wpisu — punktu nie wolno imputować zerem.
+  function hddFromTemp(y, m, tBase) {
+    const t = P.getTemp(y, m);
+    if (t == null) return null;
+    return Math.max(0, tBase - t) * daysInMonth(y, m);
+  }
+
+  // Rozwiązanie układu k×k (eliminacja Gaussa z częściowym wyborem elementu);
+  // null gdy układ osobliwy (np. wszystkie HDD identyczne).
+  function solveLinear(A, v) {
+    const k = v.length;
+    const M = A.map((row, i) => row.concat(v[i]));
+    for (let col = 0; col < k; col++) {
+      let piv = col;
+      for (let r = col + 1; r < k; r++) if (Math.abs(M[r][col]) > Math.abs(M[piv][col])) piv = r;
+      if (Math.abs(M[piv][col]) < 1e-9) return null;
+      const tmp = M[col]; M[col] = M[piv]; M[piv] = tmp;
+      for (let r = 0; r < k; r++) {
+        if (r === col) continue;
+        const f = M[r][col] / M[col][col];
+        for (let c = col; c <= k; c++) M[r][c] -= f * M[col][c];
+      }
+    }
+    return M.map((row, i) => row[k] / row[i]);
+  }
+
+  // OLS sygnatury E = a + b·hdd (+ c·t przy withTrend) z równań normalnych.
+  // points = [{ hdd, t, e }]. Zwraca { a, b, c, n, r2 } lub null.
+  P._signatureFit = function(points, withTrend) {
+    const n = points.length;
+    if (!n) return null;
+    const k = withTrend ? 3 : 2;
+    const reg = p => withTrend ? [1, p.hdd, p.t] : [1, p.hdd];
+    const A = [];
+    for (let i = 0; i < k; i++) A.push(new Array(k).fill(0));
+    const v = new Array(k).fill(0);
+    for (const p of points) {
+      const x = reg(p);
+      for (let i = 0; i < k; i++) {
+        v[i] += x[i] * p.e;
+        for (let j = 0; j < k; j++) A[i][j] += x[i] * x[j];
+      }
+    }
+    const s = solveLinear(A, v);
+    if (!s) return null;
+    const a = s[0], b = s[1], c = withTrend ? s[2] : 0;
+    const meanE = points.reduce((q, p) => q + p.e, 0) / n;
+    let ssRes = 0, ssTot = 0;
+    for (const p of points) {
+      const d = p.e - (a + b * p.hdd + c * p.t);
+      ssRes += d * d;
+      ssTot += (p.e - meanE) ** 2;
+    }
+    return { a, b, c, n, r2: ssTot > 0 ? 1 - ssRes / ssTot : 1 };
+  };
+
+  // Dopasowanie sygnatury budynku na CAŁEJ historii CO (miesiące grzewcze
+  // z rekordem ORAZ jawną temperaturą — inne punkty wykluczone, bez imputacji).
+  // Liczona od nowa przy każdym wywołaniu — danych mało, fit jest tani,
+  // a cache groziłby przestarzałą sygnaturą. Degradacja przy małej historii:
+  // ≥3 sezony → pełny model (a,b,c); mniej → c=0; <5 punktów → null (fallback).
+  // Zwraca { a, b, c, n, nSeasons, r2, t0 } (t0 = sezon o numerze t=1) lub null.
+  P.fitSignature = function(building) {
+    const city = activeCity();
+    if (!city) return null;
+    const pts = [];
+    const seasons = new Set();
+    P.records.forEach(r => {
+      if (r.building !== building || r.medium !== 'CO') return;
+      const s = seasonOf(r.year, r.month);
+      if (s == null) return;
+      const hdd = hddFromTemp(r.year, r.month, city.tBase);
+      if (hdd == null) return;
+      pts.push({ hdd, season: s, e: r.gj });
+      seasons.add(s);
+    });
+    if (pts.length < 5) return null;
+    const t0 = Math.min.apply(null, [...seasons]);
+    pts.forEach(p => { p.t = p.season - t0 + 1; });
+    const fit = P._signatureFit(pts, seasons.size >= 3);
+    if (!fit) return null;
+    fit.nSeasons = seasons.size;
+    fit.t0 = t0;
+    return fit;
+  };
+
+  // Kwantyl p∈[0,100] z próby (interpolacja liniowa) — percentyl surowości zimy.
+  P._quantile = function(values, p) {
+    const v = values.slice().sort((a, b) => a - b);
+    if (!v.length) return null;
+    const pos = (v.length - 1) * p / 100;
+    const lo = Math.floor(pos), hi = Math.ceil(pos);
+    return v[lo] + (v[hi] - v[lo]) * (pos - lo);
+  };
+
+  // HDD prognozowanego miesiąca. Jawna temperatura użytkownika ma pierwszeństwo
+  // (scenariusz „wiem lepiej" — bez skalowania percentylem); inaczej rok typowy
+  // × korekta trendu klimatu (ekstrapolacja sum sezonowych na sezon prognozy)
+  // × percentyl surowości zimy (state.m02HddP, liczony na SUMACH SEZONOWYCH —
+  // sumowanie percentyli miesięcznych zawyżałoby wynik). Null poza sezonem.
+  function hddForecast(y, m, city) {
+    const explicit = hddFromTemp(y, m, city.tBase);
+    if (explicit != null) return explicit;
+    const typ = city.monthlyHDD[m];
+    if (typ == null) return null;
+    const sums = city.seasonSums, mean = city.meanSeasonSum;
+    // prosta trendu przechodzi przez środek próby → wartość dla sezonu prognozy
+    const i = seasonOf(y, m) - city.firstSeason;
+    const kClimate = Math.max(0, (mean + city.trendPerSeason * (i - (sums.length - 1) / 2)) / mean);
+    const ratio = P._quantile(sums, P.state.m02HddP) / mean;
+    return typ * kClimate * ratio;
+  }
+
+  // Prognoza CO sygnaturą dla (budynek, miesiąc, rok); null → wołający spada
+  // na trend per miesiąc (poza sezonem grzewczym, brak klimatologii/danych).
+  function forecastSignature(b, monthId, year) {
+    if (seasonOf(year, monthId) == null) return null;
+    const city = activeCity();
+    if (!city) return null;
+    const fit = P.fitSignature(b);
+    if (!fit) return null;
+    const hdd = hddForecast(year, monthId, city);
+    if (hdd == null) return null;
+    const t = seasonOf(year, monthId) - fit.t0 + 1;
+    const value = Math.max(0, fit.a + fit.b * hdd + fit.c * t);
+    return { value, method: `sygnatura HDD (${fit.n} mies.)`, n: fit.n };
+  }
+
+  // Prognoza GJ. Dla CO — trend wprost na GJ albo sygnatura energetyczna
+  // (state.m02Method === 'hdd'; miesiące letnie i przypadki bez danych
+  // spadają na trend). Dla CWU przy bazie 'gj' — trend wprost na GJ;
+  // przy bazie 'intensity' — GJ = prognoza(GJ/m³) × prognoza(m³): rozdziela
   // część fizyczną (wskaźnik) od zachowania (zużycie wody), co stabilizuje ekstrapolację.
   P.forecastGJ = function(b, med, monthId, year) {
+    if (med === 'CO' && P.state.m02Method === 'hdd') {
+      const fs = forecastSignature(b, monthId, year);
+      if (fs) return fs;                       // brak warunków → fallback na trend
+    }
     if (med === 'CWU' && P.state.cwuBasis === 'intensity') {
       const fi = forecastIntensity(b, med, monthId, year);
       const fq = forecastField(b, med, monthId, year, 'qty');

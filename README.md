@@ -1,4 +1,4 @@
-# Kalkulator zaliczek CO/CWU — v1.0.0
+# Kalkulator zaliczek CO/CWU — v1.1.0
 
 Planowanie miesięcznych zaliczek na centralne ogrzewanie (CO) i ciepłą wodę
 użytkową (CWU) dla budynków spółdzielni mieszkaniowej. Uruchamiany z `file://`
@@ -6,7 +6,7 @@ użytkową (CWU) dla budynków spółdzielni mieszkaniowej. Uruchamiany z `file:
 
 ## Uruchomienie
 
-Otwórz `kalkulator-zaliczek.v1.0.html` w przeglądarce. Folder `css/` i `js/`
+Otwórz `kalkulator-zaliczek.v1.1.html` w przeglądarce. Folder `css/` i `js/`
 muszą leżeć obok pliku HTML.
 
 ## Architektura
@@ -16,8 +16,8 @@ muszą leżeć obok pliku HTML.
   font z Google Fonts (kosmetyka). Całość działa offline, prosto z dysku.
 - **Brak ES modules** (Chrome blokuje `import/export` na `file://`) — zamiast tego
   każdy plik JS to IIFE rozszerzające jeden wspólny namespace `window.KZ`. Skrypty
-  ładują się w **sztywnej kolejności** (`config → data → estimate → persist →
-  render → render.mXX → app`; zob. koniec pliku HTML).
+  ładują się w **sztywnej kolejności** (`config → climate → data → estimate →
+  persist → render → render.mXX → app`; zob. koniec pliku HTML).
 - **Jedno źródło prawdy UI** — `KZ.state` trzyma wyłącznie ustawienia interfejsu;
   dane domenowe leżą osobno w magazynach `records`/`prices`/`temps`/`advances`/`areas`,
   dzięki czemu łatwo serializują się do JSON.
@@ -32,11 +32,12 @@ css/                            kolejność ładowania w HTML: tokens → layout
   kz.components.css             komponenty (macierze, wykresy, przyciski)
   kz.layout.css                 layout (nagłówek, moduły, kontrolki, stopka)
   kz.tokens.css                 zmienne (kolory, odstępy) — motyw jasny
-js/                             kolejność ładowania w HTML: config → data → estimate → persist → render → render.mXX → app
+js/                             kolejność ładowania w HTML: config → climate → data → estimate → persist → render → render.mXX → app
   kz.app.js                     orkiestracja: update(), init(), listenery
+  kz.climate.js                 klimatologia HDD per miasto (plik GENEROWANY przez tools/hdd-climate.js)
   kz.config.js                  namespace KZ, stałe, P.state
   kz.data.js                    magazyny records/prices/temps/advances/areas + CRUD
-  kz.estimate.js                prognoza zużycia, simulate(), metricMatrix()
+  kz.estimate.js                prognoza zużycia (trend / sygnatura HDD), simulate(), metricMatrix()
   kz.persist.js                 eksport/import JSON + autosave
   kz.render.js                  wspólne helpery (formatery, szkielet SVG)
   kz.render.m01.js              Moduł 01 — macierz danych
@@ -47,8 +48,12 @@ docs/
   screenshot.png               zrzut ekranu (sekcja na końcu)
 import/
   import_gr4_gr5.json          przykładowe dane (budynki GR-04/GR-05) do wczytania
+tests/
+  hdd-selftest.js              samotest silnika sygnatury HDD (node tests/hdd-selftest.js)
+tools/
+  hdd-climate.js               generator js/kz.climate.js z archiwum Open-Meteo (Node, deweloperski)
 CLAUDE.md                        wskazówki dla Claude Code przy edycji repo
-kalkulator-zaliczek.v1.0.html   strona główna (na końcu pliku — kolejność <script>)
+kalkulator-zaliczek.v1.1.html   strona główna (na końcu pliku — kolejność <script>)
 README.md                        ten plik
 ```
 
@@ -110,24 +115,60 @@ i CWU [zł/m³]. To te stawki, których kalkulator **nie zmienia** — traktuje 
 jako narzucone z góry i dobiera tylko brakujący „ogon" późniejszych miesięcy
 (Moduł 04).
 
+## Metody prognozy zużycia
+
+Prognoza dotyczy pustego „ogona" miesięcy — od pierwszego miesiąca bez danych
+do końca zakresu z Modułu 01. Metodę wybiera się **osobno per medium** (dwa
+selecty w Module 02); wybór jest globalny i przestawia całą prognozę, więc
+wpływa też na koszty i dobór zaliczek w Module 04.
+
+**Wspólny fundament — trend per miesiąc.** Wartość dla prognozowanego miesiąca
+liczy się z tego samego miesiąca kalendarzowego w poprzednich latach:
+
+- 0 próbek → miesiąc pomijany (brak symulacji),
+- 1 próbka → trend płaski równy tej wartości,
+- ≥2 próbki → regresja liniowa względem **roku** i ekstrapolacja.
+
+### CO (`state.m02Method`)
+
+- **Trend per miesiąc (GJ)** — `'trend'`, domyślna. Trend jak wyżej, liczony
+  wprost na zużyciu GJ. Zakłada, że „przyszły styczeń będzie jak poprzednie
+  stycznie (plus trend wieloletni)" — nie wie nic o pogodzie.
+- **Sygnatura energetyczna (HDD)** — `'hdd'`. Model fizyczny
+  `E = a + b·HDD + c·t`, gdzie `a` to baza niezależna od pogody [GJ], `b` —
+  czułość pogodowa [GJ/stopniodzień], `c` — trend międzysezonowy (np. efekt
+  termomodernizacji), a `HDD` to stopniodni grzania: `max(0, 15 − T_śr) ×
+  liczba dni miesiąca`. Model uczy się jedną regresją na wszystkich miesiącach
+  grzewczych (paź–kwi) budynku, które mają wpisaną temperaturę zewnętrzną
+  (Moduł 01). HDD prognozowanego miesiąca bierze się z jawnej temperatury
+  (jeśli wpisana — scenariusz „wiem lepiej") albo z wbudowanej klimatologii
+  miasta: rok typowy × trend klimatu × wybrany **percentyl surowości zimy**
+  (P50–P90, domyślnie P80 — zaliczki z marginesem na zimę chłodniejszą niż
+  zwykle; nadwyżka wraca przy rozliczeniu). Poza sezonem grzewczym (maj–wrz)
+  i przy braku danych metoda cicho spada na trend per miesiąc — sygnatura
+  obejmuje więc tylko paź–kwi, ale **prognoza i zaliczki obejmują cały rok**:
+  majowe dogrzewanie czy letnie straty na instalacji (w danych realnie
+  1–30 GJ) liczą się trendem z analogicznych miesięcy i normalnie wchodzą
+  do kosztów oraz doboru stawek.
+
+### CWU (`state.cwuBasis`)
+
+- **Trend per miesiąc (GJ/m³ i m³)** — `'intensity'`, domyślna. Dwa osobne
+  trendy mnożone przez siebie: `trend(GJ/m³) × trend(m³)`. Rozdziela część
+  fizyczną (ile energii kosztuje podgrzanie m³ wody — zależy od instalacji
+  i strat) od zachowania mieszkańców (ile wody zużywają).
+- **Trend per miesiąc (GJ i m³)** — `'gj'`. Trend liczony wprost na zużyciu
+  GJ, bez rozdzielania; woda [m³] prognozowana osobno (potrzebna jako driver
+  zaliczki CWU).
+
 ## Algorytm zaliczek
 
 Zaliczki liczone są **per budynek i medium**, na zakresie miesięcy z Modułu 01,
 osobno dla każdego **okresu rozliczeniowego** (CO = rok / 12 mies., CWU =
 półrocze / 6 mies.).
 
-1. **Prognoza zużycia** dla pustego „ogona" miesięcy — z tego samego miesiąca
-   kalendarzowego w poprzednich latach:
-   - 0 próbek → miesiąc pomijany (brak symulacji),
-   - 1 próbka → trend płaski równy tej wartości,
-   - ≥2 próbki → regresja liniowa względem **roku** i ekstrapolacja.
-
-   Sposób prognozy wybiera się **osobno per medium** (dwa selecty w Module 02).
-   Dla **CO** jest na razie jedna pozycja — „Trend per miesiąc (GJ)". Dla **CWU**
-   (`state.cwuBasis`) są dwie: `'intensity'` — „Trend per miesiąc (GJ/m³ i m³)",
-   czyli `trend(GJ/m³) × trend(m³)`, rozdzielający część fizyczną (energia na m³)
-   od zachowania (zużycie wody) (domyślnie), lub `'gj'` — „Trend per miesiąc
-   (GJ i m³)", czyli trend wprost na GJ.
+1. **Prognoza zużycia** dla pustego „ogona" miesięcy — wybraną metodą
+   (zob. [Metody prognozy zużycia](#metody-prognozy-zużycia)).
 2. **Koszt miesiąca** = zużycie_GJ × cena_GJ(rok, miesiąc). Cena bez wpisu
    dziedziczy ostatnią znaną wcześniejszą (carry-forward; ECO ogłasza taryfy
    z wyprzedzeniem — można je wpisać).
@@ -155,16 +196,17 @@ półrocze / 6 mies.).
   ogon po ostatniej wpisanej stawce.
 - **Zaliczka per budynek** (nie per lokal). Alokacja na lokale (CWU wg m³, CO wg m²)
   do dodania w kolejnej iteracji.
-- **Sposób prognozy CWU:** domyślnie `'intensity'` (`trend(GJ/m³) × trend(m³)` — rozdziela
-  energię na m³ od zużycia wody); select „Sposób prognozy CWU" w Module 02 pozwala wrócić
-  do `'gj'` (trend wprost na GJ).
+- **Sposób prognozy:** CO domyślnie `'trend'`, CWU domyślnie `'intensity'`;
+  selecty w Module 02 (zob. [Metody prognozy zużycia](#metody-prognozy-zużycia)).
+  Sygnatura HDD wymaga temperatur zewnętrznych w Module 01 i klimatologii miasta
+  (wbudowane: Opole).
 - **Trwałość:** główny mechanizm to eksport/import pliku JSON (Wczytaj/Zapisz/Wyczyść
   w górnym pasku); dodatkowo best-effort autosave w `localStorage`.
 
 ## Świadomie pominięte
 
-Alokacja na poszczególne lokale, wybór wielu metod estymacji (jest jedna: trend),
-margines bezpieczeństwa (%). Wszystko łatwe do dołożenia w architekturze KZ.
+Alokacja na poszczególne lokale, margines bezpieczeństwa (%) inny niż percentyl
+surowości zimy. Wszystko łatwe do dołożenia w architekturze KZ.
 
 ## Zrzut ekranu
 
