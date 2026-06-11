@@ -74,9 +74,13 @@ window.KZ = window.KZ || {};
       // dziura: placeholder pokazuje cenę odziedziczoną (carry-forward) zamiast „zł/GJ"
       const inherited = !explicitPrice ? P.getPrice(w.year, w.month) : 0;
       const pricePh = inherited > 0 ? `${num(inherited)} zł/GJ` : 'zł/GJ';
+      // temperatura: pomiar bez dziedziczenia — brak wpisu = puste pole (0 i ujemne poprawne)
+      const t = P.getTemp(w.year, w.month);
+      const temp = t != null ? t : '';
       return `<tr><th class="mlabel">
         <div class="ml-month">${lbl}</div>
         <div class="ml-price"><input type="number" step="0.01" min="0" data-price-y="${w.year}" data-price-m="${w.month}" value="${price}" title="Cena ciepła [zł/GJ]" placeholder="${pricePh}"></div>
+        <div class="ml-temp"><input type="number" step="0.1" data-temp-y="${w.year}" data-temp-m="${w.month}" value="${temp}" title="Średnia temperatura zewnętrzna [°C]" placeholder="°C"></div>
         ${rmBtn}
       </th><td class="addcol"></td>${cells}<td class="addcol"></td></tr>`;
     }).join('');

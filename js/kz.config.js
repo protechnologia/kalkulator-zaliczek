@@ -52,6 +52,9 @@ window.KZ = window.KZ || {};
   //   field 'intensity' → GJ/dzielnik (powierzchnia dla CO, woda dla CWU)
   //   field 'gj'        → samo zużycie GJ
   //   field 'qty'       → zużycie wody [m³] (tylko CWU)
+  //   field 'cost'      → koszt [zł] = GJ × cena ciepła
+  //   field 'price'     → cena ciepła [zł/GJ] — globalna z P.prices, niezależna od budynku
+  //   field 'temp'      → temperatura zewn. [°C] — globalna z P.temps; może być ≤ 0, bez prognozy „ogona"
   P.M02_METRICS = [
     { id: 'co_int',    medium: 'CO',  field: 'intensity', label: 'CO — wskaźnik',  unit: 'GJ/m²' },
     { id: 'co_gj',     medium: 'CO',  field: 'gj',        label: 'CO — zużycie',   unit: 'GJ'    },
@@ -60,7 +63,8 @@ window.KZ = window.KZ || {};
     { id: 'cwu_gj',    medium: 'CWU', field: 'gj',        label: 'CWU — zużycie',  unit: 'GJ'    },
     { id: 'cwu_water', medium: 'CWU', field: 'qty',       label: 'CWU — woda',     unit: 'm³'    },
     { id: 'cwu_cost',  medium: 'CWU', field: 'cost',      label: 'CWU — koszt',    unit: 'zł'    },
-    { id: 'price',     medium: 'CO',  field: 'price',     label: 'Cena ciepła',    unit: 'zł/GJ' }
+    { id: 'price',     medium: 'CO',  field: 'price',     label: 'Cena ciepła',    unit: 'zł/GJ' },
+    { id: 'temp',      medium: 'CO',  field: 'temp',      label: 'Temperatura zewn.', unit: '°C' }
   ];
   P.m02Metric = id => P.M02_METRICS.find(m => m.id === id) || P.M02_METRICS[0];
 

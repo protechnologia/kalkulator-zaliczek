@@ -45,17 +45,19 @@ window.KZ = window.KZ || {};
   };
 
   // Szkielet wykresu: zwraca {W,H,padL..,cw,ch,x,y,gridY,axes} dla osi
-  // kategorialnej X (słupki/linie wg etykiet) i liniowej Y [0..yMax].
+  // kategorialnej X (słupki/linie wg etykiet) i liniowej Y [yMin..yMax]
+  // (opts.yMin, domyślnie 0 — ujemny zakres potrzebuje np. temperatura).
   P._frame = function(yMax, nTicks, opts) {
     opts = opts || {};
     const W = opts.W || 780, H = opts.H || 300;
     const padL = opts.padL || 54, padR = opts.padR || 18, padT = opts.padT || 22, padB = opts.padB || 38;
     const cw = W - padL - padR, ch = H - padT - padB;
     const fmtY = opts.fmtY || P.fmt.pl0;          // formater etykiet osi Y (np. pl2 dla małych wskaźników)
-    const y = v => padT + ch - (v / yMax) * ch;
+    const yMin = opts.yMin || 0;
+    const y = v => padT + ch - ((v - yMin) / (yMax - yMin)) * ch;
     let grid = '', yLabels = '';
     for (let i = 0; i <= nTicks; i++) {
-      const v = yMax * i / nTicks, yy = y(v);
+      const v = yMin + (yMax - yMin) * i / nTicks, yy = y(v);
       grid += `<line x1="${padL}" y1="${yy.toFixed(2)}" x2="${(W - padR).toFixed(2)}" y2="${yy.toFixed(2)}"
                      stroke="var(--kz-border)" stroke-width="1" ${i === 0 ? '' : 'stroke-dasharray="2,3"'}/>`;
       yLabels += `<text x="${padL - 8}" y="${(yy + 3.5).toFixed(2)}" text-anchor="end">${fmtY(v)}</text>`;

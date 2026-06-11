@@ -19,7 +19,7 @@ muszą leżeć obok pliku HTML.
   ładują się w **sztywnej kolejności** (`config → data → estimate → persist →
   render → render.mXX → app`; zob. koniec pliku HTML).
 - **Jedno źródło prawdy UI** — `KZ.state` trzyma wyłącznie ustawienia interfejsu;
-  dane domenowe leżą osobno w magazynach `records`/`prices`/`advances`/`areas`,
+  dane domenowe leżą osobno w magazynach `records`/`prices`/`temps`/`advances`/`areas`,
   dzięki czemu łatwo serializują się do JSON.
 - **Przepływ danych** — każda zmiana w UI woła `KZ.update()`, które przelicza
   symulację i renderuje wszystkie moduły. Listenery podpięte przez delegację
@@ -35,12 +35,12 @@ css/                            kolejność ładowania w HTML: tokens → layout
 js/                             kolejność ładowania w HTML: config → data → estimate → persist → render → render.mXX → app
   kz.app.js                     orkiestracja: update(), init(), listenery
   kz.config.js                  namespace KZ, stałe, P.state
-  kz.data.js                    magazyny records/prices/advances + CRUD
+  kz.data.js                    magazyny records/prices/temps/advances + CRUD
   kz.estimate.js                prognoza zużycia, simulate(), metricMatrix()
   kz.persist.js                 eksport/import JSON + autosave
   kz.render.js                  wspólne helpery (formatery, szkielet SVG)
   kz.render.m01.js              Moduł 01 — macierz danych
-  kz.render.m02.js              Moduł 02 — zużycie (8 wielkości)
+  kz.render.m02.js              Moduł 02 — zużycie (9 wielkości)
   kz.render.m03.js              Moduł 03 — macierz stawek zaliczek
   kz.render.m04.js              Moduł 04 — dobór zaliczek
 docs/
@@ -83,6 +83,10 @@ Przykładowy plik (skrócony — po jednym wpisie na magazyn):
   "prices": {
     "2023-01": 78.5                     // styczeń 2023 [zł/GJ]
   },
+  // średnia temperatura zewnętrzna [°C], klucz "RRRR-MM" (wspólna dla budynków)
+  "temps": {
+    "2023-01": 3.9                      // styczeń 2023 [°C]
+  },
   // stawki jednostkowe zaliczek, klucz "budynek|medium|RRRR-MM"
   "advances": {
     "GR-04|CO|2023-01": 1.85,           // CO [zł/m²]
@@ -101,9 +105,11 @@ wody — które trafiają do magazynu `records`, a powierzchnię budynku (m²) w
 się raz, w nagłówku jego kolumny, skąd zasila magazyn `areas`. Tabelę można
 dowolnie rozszerzać: dodawać puste budynki i miesiące.
 
-Pozostałe dwa magazyny wypełnia się gdzie indziej. **Cena ciepła** (`prices`)
-jest jedna na miesiąc — wspólna dla wszystkich budynków — więc wpisuje się ją
-raz na wiersz, również w Module 01. **Stawki zaliczek ustalonych** (`advances`)
+Pozostałe magazyny wypełnia się gdzie indziej. **Cena ciepła** (`prices`)
+i **średnia temperatura zewnętrzna** (`temps`) są jedne na miesiąc — wspólne
+dla wszystkich budynków — więc wpisuje się je raz na wiersz, również w
+Module 01 (temperatura to czysty kontekst do analizy w Module 02: nie wchodzi
+do kosztów ani doboru zaliczek). **Stawki zaliczek ustalonych** (`advances`)
 podaje się w Module 03, w tabeli o tym samym układzie co Moduł 01 (wiersze =
 miesiące, kolumny = budynki): w każdej komórce stawka jednostkowa CO [zł/m²]
 i CWU [zł/m³]. To te stawki, których kalkulator **nie zmienia** — traktuje je

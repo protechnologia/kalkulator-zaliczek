@@ -18,7 +18,7 @@ window.KZ = window.KZ || {};
     return JSON.stringify({
       app: 'kalkulator-zaliczek', version: P.VERSION,
       savedAt: new Date().toISOString(),
-      state: P.state, records: P.records, prices: P.prices, advances: P.advances, areas: P.areas
+      state: P.state, records: P.records, prices: P.prices, temps: P.temps, advances: P.advances, areas: P.areas
     }, null, 2);
   };
 
@@ -29,6 +29,7 @@ window.KZ = window.KZ || {};
     if (obj.prices)   P.prices   = obj.prices;
     if (obj.advances) P.advances = obj.advances;
     P.areas = obj.areas || {};
+    P.temps = obj.temps || {};       // starsze pliki nie mają temperatur
     // układ macierzy: z pliku albo null → ponowny zasiew z danych (starsze pliki go nie mają)
     const s = obj.state || {};
     P.state.m01Cols = s.m01Cols || null;

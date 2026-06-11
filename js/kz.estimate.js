@@ -270,6 +270,13 @@ window.KZ = window.KZ || {};
           if (price > 0) { if (price > peak) peak = price; return { year: w.year, month: w.month, status: 'actual', value: price, gj: 0, qty: 0 }; }
           return { year: w.year, month: w.month, status: 'none', value: 0, gj: 0, qty: 0 };
         }
+        // Temperatura zewnętrzna też jest globalna; w odróżnieniu od ceny
+        // 0 i wartości ujemne są poprawnymi pomiarami (brak wpisu = null).
+        if (field === 'temp') {
+          const t = P.getTemp(w.year, w.month);
+          if (t != null) { if (t > peak) peak = t; return { year: w.year, month: w.month, status: 'actual', value: t, gj: 0, qty: 0 }; }
+          return { year: w.year, month: w.month, status: 'none', value: 0, gj: 0, qty: 0 };
+        }
         const rec = P.getRecord(b, medium, w.year, w.month);
         if (rec) {                                   // FAKT
           const value = valueOf(rec.gj, rec.qty, area, price);
@@ -306,6 +313,7 @@ window.KZ = window.KZ || {};
   // przechodzącej przez analogiczne miesiące. Zwraca liczbę lub null (brak próbek).
   P.metricTrendValue = function(metric, building, monthId, year) {
     if (metric.field === 'price') { const p = P.getPrice(year, monthId); return p > 0 ? p : null; }
+    if (metric.field === 'temp')  { return P.getTemp(year, monthId); }
     const isCO = metric.medium === 'CO';
     const fg = P.forecastGJ(building, metric.medium, monthId, year);
     const fq = P.forecastQty(building, metric.medium, monthId, year);

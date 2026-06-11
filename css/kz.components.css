@@ -443,6 +443,8 @@
 .kz-matrix .mlabel .ml-price { display: flex; align-items: center; gap: 4px; }
 .kz-matrix .mlabel .ml-price input { width: 60px; background: var(--kz-bg-0); }
 .kz-matrix .mlabel .ml-price .u { font-size: 8px; letter-spacing: 0; color: var(--kz-text-3); }
+.kz-matrix .mlabel .ml-temp { display: flex; align-items: center; gap: 4px; }
+.kz-matrix .mlabel .ml-temp input { width: 44px; background: var(--kz-bg-0); }
 .kz-matrix .bld-name {
   display: flex;
   align-items: center;

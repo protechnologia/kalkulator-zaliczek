@@ -64,23 +64,33 @@ window.KZ = window.KZ || {};
     const svg = document.getElementById('kz-m02-chart');
     if (!svg) return;
     const N = months.length;
-    const peak = series ? series.cells.reduce((m, c) => Math.max(m, c.value), 0) : 0;
+    // temperatura może być ujemna lub 0 → oś Y z yMin < 0 i słupki w dół od zera
+    const isTemp = metric.field === 'temp';
+    const vals = series ? series.cells.filter(c => c.status !== 'none').map(c => c.value) : [];
+    const peak   = vals.reduce((m, v) => Math.max(m, v), 0);
+    const valley = vals.reduce((m, v) => Math.min(m, v), 0);
 
-    if (!series || N === 0 || peak <= 0) {
-      svg.innerHTML = `<text x="50" y="40">brak danych — uzupełnij zużycie w Module 01</text>`;
+    if (!series || N === 0 || (peak <= 0 && valley >= 0)) {
+      svg.innerHTML = `<text x="50" y="40">brak danych — uzupełnij dane w Module 01</text>`;
       return;
     }
 
-    // wskaźniki intensywności (GJ/m², GJ/m³) są małe → 3 miejsca po przecinku; reszta 2
-    const fmtV = metric.field === 'intensity' ? P.fmt.pl3 : P.fmt.pl2;
+    // wskaźniki intensywności (GJ/m², GJ/m³) są małe → 3 miejsca po przecinku;
+    // temperatura → 1 miejsce; reszta 2
+    const fmtV = metric.field === 'intensity' ? P.fmt.pl3 : isTemp ? P.fmt.pl1 : P.fmt.pl2;
 
-    const yMax = P._niceMax(peak, 1.12);
-    const fr = P._frame(yMax, 5, { padL: 56, fmtY: fmtV, H: 270, padB: 40 });
+    const yMax = peak   > 0 ? P._niceMax(peak, 1.12)    : 0;
+    const yMin = valley < 0 ? -P._niceMax(-valley, 1.12) : 0;
+    const fr = P._frame(yMax, 5, { padL: 56, fmtY: fmtV, H: 270, padB: 40, yMin });
     const slot = fr.cw / N;
     const gpad = Math.min(slot * 0.18, 10);
     const bw   = slot - 2 * gpad;
     const y0   = fr.y(0);
     const axisY = fr.padT + fr.ch;
+    // wyróżniona linia zera, gdy oś schodzi poniżej (temperatury ujemne)
+    const zero = yMin < 0
+      ? `<line x1="${fr.padL}" y1="${y0.toFixed(2)}" x2="${(fr.W - fr.padR).toFixed(2)}" y2="${y0.toFixed(2)}" stroke="var(--kz-border-strong)" stroke-width="1"/>`
+      : '';
 
     // pionowa linia „prognoza →" + lekkie tło na prawo (miesiące prognozowane „ogona")
     const fi = series.cells.findIndex(c => c.status === 'forecast');
@@ -102,12 +112,15 @@ window.KZ = window.KZ || {};
       mLabels += `<text x="${cx.toFixed(2)}" y="${(axisY + 12).toFixed(2)}" text-anchor="middle" font-size="8">${w.month}</text>`;
 
       const c = series.cells[i];
-      if (c.status === 'none' || c.value <= 0) return;
+      if (c.status === 'none' || (!isTemp && c.value <= 0)) return;
       const bx = gx + gpad;
-      const by = fr.y(c.value);
-      const bh = Math.max(0.5, y0 - by);
+      const yv = fr.y(c.value);
+      const by = Math.min(yv, y0);                 // słupek ujemny rośnie w dół od linii zera
+      const bh = Math.max(0.5, Math.abs(yv - y0));
       const fcast = c.status === 'forecast';
-      const vy = Math.max(by - 5, fr.padT + 9);
+      const vy = c.value < 0
+        ? Math.min(by + bh + 11, fr.padT + fr.ch - 3)   // etykieta pod ujemnym słupkiem
+        : Math.max(by - 5, fr.padT + 9);
       const title = `${P.MONTHS[w.month - 1].abbr} ${w.year} · ${fmtV(c.value)} ${metric.unit}${fcast ? ' (prognoza)' : ''}`;
       bars +=
         `<g class="kz-bar" data-month="${w.month}">` +
@@ -129,7 +142,7 @@ window.KZ = window.KZ || {};
       months.forEach((w, i) => {
         if (w.month !== M) return;
         const v = P.metricTrendValue(metric, series.building, M, w.year);
-        if (v == null || v <= 0) return;
+        if (v == null || (!isTemp && v <= 0)) return;
         pts.push({ x: fr.padL + i * slot + slot / 2, y: fr.y(v) });
       });
       if (pts.length < 2) return;
@@ -153,7 +166,7 @@ window.KZ = window.KZ || {};
       s = e + 1;
     }
 
-    svg.innerHTML = `${shade}${fr.grid}${fr.axes}${fmark}${bars}${trends}${fr.yLabels}${mLabels}${yLabels2}` +
+    svg.innerHTML = `${shade}${fr.grid}${fr.axes}${zero}${fmark}${bars}${trends}${fr.yLabels}${mLabels}${yLabels2}` +
       `<text x="${fr.padL - 46}" y="${fr.padT - 10}" font-size="9.5" letter-spacing="1.2">[${metric.unit}]</text>`;
   }
 

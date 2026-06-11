@@ -118,6 +118,7 @@ window.KZ = window.KZ || {};
       const d = e.target.dataset; if (!d) return;
       if (d.areaB != null) { P.setArea(d.areaB, e.target.value); requestSimRefresh(); return; }
       if (d.priceM != null) { P.setPrice(+d.priceY, +d.priceM, e.target.value === '' ? null : parseFloat(e.target.value)); requestSimRefresh(); return; }
+      if (d.tempM != null) { P.setTemp(+d.tempY, +d.tempM, e.target.value === '' ? null : parseFloat(e.target.value)); requestSimRefresh(); return; }
       if (d.cell == null) return;
       const b = d.b, y = +d.y, m = +d.m, v = e.target.value;
       if (d.cell === 'co')         P.setCellCO(b, y, m, v);
@@ -186,7 +187,7 @@ window.KZ = window.KZ || {};
     });
     document.getElementById('kz-reset').addEventListener('click', () => {
       if (!confirm('Wyczyścić wszystkie dane kalkulatora?')) return;
-      P.records = []; P.prices = {}; P.advances = {}; P.areas = {}; P.state.building = null;
+      P.records = []; P.prices = {}; P.temps = {}; P.advances = {}; P.areas = {}; P.state.building = null;
       P.state.m01Cols = null; P.state.m01From = null; P.state.m01To = null;
       P.update();
     });

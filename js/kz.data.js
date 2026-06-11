@@ -6,6 +6,8 @@
                   { id, building, medium, year, month, gj, qty }
                   qty = m² (CO, stałe dla budynku) lub m³ (CWU, zmienne)
      P.prices   — ceny ciepła ECO, klucz "RRRR-MM" → zł/GJ (wspólne)
+     P.temps    — średnia temperatura zewnętrzna, klucz "RRRR-MM" → °C
+                  (wspólna dla budynków; pomiar, więc BEZ carry-forward)
      P.advances — zaplanowane zaliczki, klucz "budynek|medium|RRRR-MM" → zł/mies.
      P.areas    — powierzchnia per budynek, klucz "budynek" → m² (CO)
                   Współdzielona przez wszystkie miesiące; synchronizowana z qty
@@ -20,6 +22,7 @@ window.KZ = window.KZ || {};
 
   P.records  = [];
   P.prices   = {};
+  P.temps    = {};
   P.advances = {};
   P.areas    = {};
 
@@ -100,6 +103,19 @@ window.KZ = window.KZ || {};
     return best != null ? best : 0;
   };
   P.hasExplicitPrice = function(year, month) { return P.prices[P.ymKey(year, month)] != null; };
+
+  // ===== TEMPERATURA ZEWNĘTRZNA =====
+  // Średnia miesięczna [°C], wspólna dla budynków. Pomiar — brak wpisu = null
+  // (bez carry-forward jak przy cenie). Wartości ujemne i 0 są poprawne.
+  P.setTemp = function(year, month, val) {
+    const k = P.ymKey(year, month);
+    if (val === null || val === '' || isNaN(val)) delete P.temps[k];
+    else P.temps[k] = +val;
+  };
+  P.getTemp = function(year, month) {
+    const v = P.temps[P.ymKey(year, month)];
+    return v != null ? v : null;
+  };
   // Najbliższa znana cena (wg odległości miesięcy) — do kopiowania przy rozszerzaniu zakresu.
   P.nearestPrice = function(year, month) {
     const target = P.absM(year, month);
@@ -222,6 +238,7 @@ window.KZ = window.KZ || {};
     // wyczyść dane usuwanego miesiąca
     P.records = P.records.filter(r => !(r.year === rm.year && r.month === rm.month));
     delete P.prices[ym];
+    delete P.temps[ym];
     Object.keys(P.advances).forEach(k => { if (k.endsWith('|' + ym)) delete P.advances[k]; });
     // zwiń zakres
     if (which === 'first') P.state.m01From = absToYM(lo + 1);
