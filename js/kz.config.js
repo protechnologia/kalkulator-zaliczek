@@ -1,7 +1,7 @@
 /* =========================================================
    KALKULATOR-ZALICZEK — Konfiguracja i stan
 
-   Tworzy globalny namespace window.KZ (alias Z w plikach modułów).
+   Tworzy globalny namespace window.KZ (alias P w plikach modułów).
    Definiuje miesiące, stałe oraz P.state — jedyne źródło prawdy UI.
 
    Wzorzec architektoniczny: brak ES modules
@@ -90,8 +90,8 @@ window.KZ = window.KZ || {};
     // --- Moduł 02 (symulacja zużycia) ---
     m02Metric:   'co_int',           // wybrana wielkość z P.M02_METRICS (GJ/m², GJ, woda…)
     m02Building: null,               // budynek pokazywany na wykresie (własny wybór M02)
-    m02Method:   'trend',            // metoda prognozy (na teraz tylko 'trend' — analogiczne miesiące)
-    cwuBasis:    'intensity',        // baza prognozy GJ dla CWU: 'intensity' = trend(GJ/m³) × trend(m³) (domyślnie) | 'gj' = trend GJ wprost. CO zawsze GJ (driver = stała powierzchnia)
+    m02Method:   'trend',            // sposób prognozy CO (select #kz-m02-method-co; na teraz tylko 'trend' — analogiczne miesiące)
+    cwuBasis:    'intensity',        // sposób prognozy CWU (select #kz-m02-method-cwu): 'intensity' = trend(GJ/m³) × trend(m³) (domyślnie) | 'gj' = trend GJ wprost
 
     // --- Moduł 04 (dobór zaliczek) ---
     m04Building: null,               // budynek pokazywany na wykresie (własny wybór M04)

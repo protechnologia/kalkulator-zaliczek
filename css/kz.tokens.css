@@ -3,10 +3,10 @@
 
    Industrialny, jasny motyw z akcentami per moduł.
    Każdy moduł ma własny kolor:
-     01 Dane wejściowe  — teal
-     02 Cena ciepła     — amber
-     03 Metoda zaliczek — violet
-     04 Symulacja       — lime
+     01 Dane wejściowe     — teal
+     02 Symulacja zużycia  — amber
+     03 Zaliczki ustalone  — violet
+     04 Dobór zaliczek     — lime
 
    Ładowany jako PIERWSZY arkusz CSS — pozostałe korzystają ze zmiennych.
    ========================================================= */

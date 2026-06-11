@@ -1,14 +1,20 @@
 /* =========================================================
    KALKULATOR-ZALICZEK — Moduł 02 (Symulacja zużycia)
 
-   Wskaźnik zużycia dla WYBRANEGO budynku (select w kontrolkach):
-     • zakładka CO  → GJ/m²
-     • zakładka CWU → GJ/m³
-   Wykres kolumnowy: oś X = miesiące (zakres M01), jeden słupek na miesiąc.
+   Wykres słupkowy dla WYBRANEGO budynku (select w kontrolkach).
+   Select #kz-m02-metric wybiera jedną z 9 wielkości P.M02_METRICS
+   (zob. config.js): wskaźniki GJ/m² / GJ/m³, zużycia GJ, woda m³,
+   koszty zł, cena ciepła zł/GJ, temperatura zewn. °C (może być ≤ 0 —
+   oś z yMin, słupki w dół od wyróżnionej linii zera, bez prognozy).
+   Oś X = miesiące (zakres M01), jeden słupek na miesiąc.
    Miesiące prognozowane (pusty „ogon" po ostatnim miesiącu z danymi)
-   rysowane są jaśniej i z przerywanym obrysem.
+   rysowane są jaśniej i z przerywanym obrysem (+ kreska „prognoza →").
 
-   Metoda prognozy: trend po analogicznych miesiącach (zob. estimate.js).
+   Sposób prognozy wybierany osobno per medium (zob. estimate.js):
+     • CO  — #kz-m02-method-co  (state.m02Method; na teraz tylko trend
+             po analogicznych miesiącach)
+     • CWU — #kz-m02-method-cwu (state.cwuBasis: 'intensity' =
+             trend(GJ/m³) × trend(m³), 'gj' = trend wprost na GJ)
    ========================================================= */
 window.KZ = window.KZ || {};
 (function(P) {
@@ -46,11 +52,10 @@ window.KZ = window.KZ || {};
     if (sel && sel.value !== metric.id) sel.value = metric.id;
     fillBuildingSelect();
 
-    // Baza prognozy to globalne ustawienie CWU (wpływa na koszt i dobór zaliczek
-    // w M04, niezależnie od tego, co pokazuje wykres M02) — zawsze aktywne.
-    // Dla CO i tak nic nie zmienia (driver = stała powierzchnia, trend GJ/m²×m² ≡ trend GJ).
-    const basis = document.getElementById('kz-m02-basis');
-    if (basis) basis.value = P.state.cwuBasis;
+    // Sposób prognozy CWU to globalne ustawienie (wpływa na koszt i dobór zaliczek
+    // w M04, niezależnie od tego, co pokazuje wykres M02) — zawsze aktywny.
+    const methodCWU = document.getElementById('kz-m02-method-cwu');
+    if (methodCWU) methodCWU.value = P.state.cwuBasis;
 
     const all = P.metricMatrix(metric);
     const series = all.series.find(s => s.building === b) || null;

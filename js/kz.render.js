@@ -4,7 +4,9 @@
    P.fmt         — formatery liczb pl-PL
    P._smoothPath — interpolacja Catmull-Rom (gładkie krzywe SVG)
    P._niceMax    — "lepki" zakres osi Y z {1,2,5}×10ⁿ
-   P._svgChart   — wspólny szkielet wykresu (osie, siatka, etykiety)
+   P._frame      — wspólny szkielet wykresu (osie, siatka, etykiety);
+                   opts.fmtY = formater osi Y, opts.yMin < 0 = oś
+                   z wartościami ujemnymi (np. temperatura)
 
    Funkcje per-moduł żyją w render.mXX.js.
    ========================================================= */

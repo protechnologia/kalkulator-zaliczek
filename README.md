@@ -35,7 +35,7 @@ css/                            kolejność ładowania w HTML: tokens → layout
 js/                             kolejność ładowania w HTML: config → data → estimate → persist → render → render.mXX → app
   kz.app.js                     orkiestracja: update(), init(), listenery
   kz.config.js                  namespace KZ, stałe, P.state
-  kz.data.js                    magazyny records/prices/temps/advances + CRUD
+  kz.data.js                    magazyny records/prices/temps/advances/areas + CRUD
   kz.estimate.js                prognoza zużycia, simulate(), metricMatrix()
   kz.persist.js                 eksport/import JSON + autosave
   kz.render.js                  wspólne helpery (formatery, szkielet SVG)
@@ -83,10 +83,6 @@ Przykładowy plik (skrócony — po jednym wpisie na magazyn):
   "prices": {
     "2023-01": 78.5                     // styczeń 2023 [zł/GJ]
   },
-  // średnia temperatura zewnętrzna [°C], klucz "RRRR-MM" (wspólna dla budynków)
-  "temps": {
-    "2023-01": 3.9                      // styczeń 2023 [°C]
-  },
   // stawki jednostkowe zaliczek, klucz "budynek|medium|RRRR-MM"
   "advances": {
     "GR-04|CO|2023-01": 1.85,           // CO [zł/m²]
@@ -105,11 +101,9 @@ wody — które trafiają do magazynu `records`, a powierzchnię budynku (m²) w
 się raz, w nagłówku jego kolumny, skąd zasila magazyn `areas`. Tabelę można
 dowolnie rozszerzać: dodawać puste budynki i miesiące.
 
-Pozostałe magazyny wypełnia się gdzie indziej. **Cena ciepła** (`prices`)
-i **średnia temperatura zewnętrzna** (`temps`) są jedne na miesiąc — wspólne
-dla wszystkich budynków — więc wpisuje się je raz na wiersz, również w
-Module 01 (temperatura to czysty kontekst do analizy w Module 02: nie wchodzi
-do kosztów ani doboru zaliczek). **Stawki zaliczek ustalonych** (`advances`)
+Pozostałe dwa magazyny wypełnia się gdzie indziej. **Cena ciepła** (`prices`)
+jest jedna na miesiąc — wspólna dla wszystkich budynków — więc wpisuje się ją
+raz na wiersz, również w Module 01. **Stawki zaliczek ustalonych** (`advances`)
 podaje się w Module 03, w tabeli o tym samym układzie co Moduł 01 (wiersze =
 miesiące, kolumny = budynki): w każdej komórce stawka jednostkowa CO [zł/m²]
 i CWU [zł/m³]. To te stawki, których kalkulator **nie zmienia** — traktuje je
@@ -128,11 +122,12 @@ półrocze / 6 mies.).
    - 1 próbka → trend płaski równy tej wartości,
    - ≥2 próbki → regresja liniowa względem **roku** i ekstrapolacja.
 
-   Dla **CWU** GJ można prognozować na dwa sposoby (przełącznik „Baza prognozy"
-   w Module 02, `state.cwuBasis`): `'intensity'` — `trend(GJ/m³) × trend(m³)`,
-   rozdzielający część fizyczną (energia na m³) od zachowania (zużycie wody)
-   (domyślnie), lub `'gj'` — trend wprost na GJ. Dla **CO** wybór jest bez
-   znaczenia (driver = stała powierzchnia, więc `trend(GJ/m²)×m² ≡ trend(GJ)`).
+   Sposób prognozy wybiera się **osobno per medium** (dwa selecty w Module 02).
+   Dla **CO** jest na razie jedna pozycja — „Trend per miesiąc (GJ)". Dla **CWU**
+   (`state.cwuBasis`) są dwie: `'intensity'` — „Trend per miesiąc (GJ/m³ i m³)",
+   czyli `trend(GJ/m³) × trend(m³)`, rozdzielający część fizyczną (energia na m³)
+   od zachowania (zużycie wody) (domyślnie), lub `'gj'` — „Trend per miesiąc
+   (GJ i m³)", czyli trend wprost na GJ.
 2. **Koszt miesiąca** = zużycie_GJ × cena_GJ(rok, miesiąc). Cena bez wpisu
    dziedziczy ostatnią znaną wcześniejszą (carry-forward; ECO ogłasza taryfy
    z wyprzedzeniem — można je wpisać).
@@ -160,10 +155,10 @@ półrocze / 6 mies.).
   ogon po ostatniej wpisanej stawce.
 - **Zaliczka per budynek** (nie per lokal). Alokacja na lokale (CWU wg m³, CO wg m²)
   do dodania w kolejnej iteracji.
-- **Baza prognozy CWU:** domyślnie `'intensity'` (`trend(GJ/m³) × trend(m³)` — rozdziela
-  energię na m³ od zużycia wody); przełącznik „Baza prognozy" w Module 02 pozwala wrócić
-  do `'gj'` (trend wprost na GJ). Dla CO bez znaczenia (driver = stała powierzchnia).
-- **Trwałość:** główny mechanizm to eksport/import pliku JSON (Zapisz/Wczytaj/Wyczyść
+- **Sposób prognozy CWU:** domyślnie `'intensity'` (`trend(GJ/m³) × trend(m³)` — rozdziela
+  energię na m³ od zużycia wody); select „Sposób prognozy CWU" w Module 02 pozwala wrócić
+  do `'gj'` (trend wprost na GJ).
+- **Trwałość:** główny mechanizm to eksport/import pliku JSON (Wczytaj/Zapisz/Wyczyść
   w górnym pasku); dodatkowo best-effort autosave w `localStorage`.
 
 ## Świadomie pominięte

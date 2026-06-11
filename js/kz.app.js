@@ -75,17 +75,18 @@ window.KZ = window.KZ || {};
       m02Metric.value = P.state.m02Metric;
       m02Metric.addEventListener('change', () => { P.state.m02Metric = m02Metric.value; P.renderM02(); P.autosave(); });
     }
-    const m02Method = document.getElementById('kz-m02-method');
-    if (m02Method) {
-      m02Method.value = P.state.m02Method;
-      m02Method.addEventListener('change', () => { P.state.m02Method = m02Method.value; P.renderM02(); P.autosave(); });
+    // Sposób prognozy CO (state.m02Method — na teraz tylko 'trend')
+    const m02MethodCO = document.getElementById('kz-m02-method-co');
+    if (m02MethodCO) {
+      m02MethodCO.value = P.state.m02Method;
+      m02MethodCO.addEventListener('change', () => { P.state.m02Method = m02MethodCO.value; P.renderM02(); P.autosave(); });
     }
-    // Baza prognozy CWU — zmienia forecastGJ dla CWU, więc wpływa na koszt i dobór
-    // zaliczek (M04). Pełny P.update(), nie tylko M02.
-    const m02Basis = document.getElementById('kz-m02-basis');
-    if (m02Basis) {
-      m02Basis.value = P.state.cwuBasis;
-      m02Basis.addEventListener('change', () => { P.state.cwuBasis = m02Basis.value; P.update(); P.autosave(); });
+    // Sposób prognozy CWU (state.cwuBasis) — zmienia forecastGJ dla CWU, więc wpływa
+    // na koszt i dobór zaliczek (M04). Pełny P.update(), nie tylko M02.
+    const m02MethodCWU = document.getElementById('kz-m02-method-cwu');
+    if (m02MethodCWU) {
+      m02MethodCWU.value = P.state.cwuBasis;
+      m02MethodCWU.addEventListener('change', () => { P.state.cwuBasis = m02MethodCWU.value; P.update(); P.autosave(); });
     }
     // M02: hover na słupku → pokaż wartości WSZYSTKICH analogicznych miesięcy
     // (ten sam miesiąc kalendarzowy) + linię trendu prognozy. Delegacja na stabilnym
@@ -179,7 +180,8 @@ window.KZ = window.KZ || {};
         if (err) { alert('Błąd wczytywania: ' + err.message); return; }
         // odśwież kontrolki z wczytanego stanu
         if (m02Metric) m02Metric.value = P.state.m02Metric;
-        if (m02Method) m02Method.value = P.state.m02Method;
+        if (m02MethodCO)  m02MethodCO.value = P.state.m02Method;
+        if (m02MethodCWU) m02MethodCWU.value = P.state.cwuBasis;
         if (m04View)   m04View.value = P.state.m04View;
         P.update();
       });

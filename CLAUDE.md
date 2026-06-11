@@ -32,18 +32,18 @@ serwera i bez frameworka**, uruchamiany bezpośrednio z `file://`.
 | Plik | Rola |
 |------|------|
 | [js/kz.config.js](js/kz.config.js) | Namespace `KZ`, stałe (`MONTHS`, `MEDIA`), `P.state` — jedyne źródło prawdy UI |
-| [js/kz.data.js](js/kz.data.js) | Magazyny `records`/`prices`/`temps`/`advances` + CRUD, klucze, `periodWindow`, `isPast` |
+| [js/kz.data.js](js/kz.data.js) | Magazyny `records`/`prices`/`temps`/`advances`/`areas` + CRUD, klucze, `periodWindow`, `isPast` |
 | [js/kz.estimate.js](js/kz.estimate.js) | Prognoza zużycia (trend liniowy), `simulate()` (dobór zaliczek na zakresie M01: ustalone z M03 + dobrany „ogon"), `metricMatrix(metric)` (wielkość + prognoza „ogona" dla M02) |
 | [js/kz.persist.js](js/kz.persist.js) | Eksport/import JSON + best-effort autosave w `localStorage` |
 | [js/kz.render.js](js/kz.render.js) | Wspólne helpery: formatery `P.fmt`, szkielet wykresów SVG (`_frame` przyjmuje `opts.fmtY` i `opts.yMin` — oś z wartościami ujemnymi, np. temperatura) |
-| [js/kz.render.m01..m04.js](js/) | Render poszczególnych modułów (01 dane, 02 zużycie — 9 wielkości, 03 macierz stawek zaliczek, 04 dobór zaliczek — select widoku: wysokość zaliczek / koszt vs zaliczki CO / CWU) |
+| [js/kz.render.m01..m04.js](js/) | Render poszczególnych modułów (01 dane, 02 zużycie — 9 wielkości, 03 macierz stawek zaliczek, 04 dobór zaliczek — select widoku: zebrane zaliczki / stawki / koszt vs zaliczki, każdy per medium CO/CWU) |
 | [js/kz.app.js](js/kz.app.js) | Orkiestracja: `P.update()`, `init()`, wszystkie listenery (ładowany OSTATNI) |
 | `css/kz.tokens / kz.layout / kz.components` | Tokeny (zmienne), layout, komponenty (jasny motyw) |
 
 ## Przepływ danych
 
 - Każda zmiana w UI woła **`P.update()`** (lub `P.requestUpdate()` — debounce przez `requestAnimationFrame`), które przelicza `simulate()` i renderuje wszystkie moduły.
-- `P.state` trzyma **tylko ustawienia UI**. Dane domenowe są w osobnych magazynach (`P.records`, `P.prices`, `P.temps`, `P.advances`), żeby łatwo je serializować do JSON.
+- `P.state` trzyma **tylko ustawienia UI**. Dane domenowe są w osobnych magazynach (`P.records`, `P.prices`, `P.temps`, `P.advances`, `P.areas`), żeby łatwo je serializować do JSON.
 - Listenery podpięte przez **delegację zdarzeń** na stabilnych kontenerach (np. `#kz-m01-matrix`), bo tabele są przerysowywane przez `innerHTML`. Dodając edytowalne pola, trzymaj się wzorca `data-*` + delegacja (zob. [js/kz.app.js](js/kz.app.js)).
 - **Focus podczas edycji:** przerysowanie kontenera przez `innerHTML` gubi focus w polu. Dlatego edycja komórek M01 woła `requestSimRefresh()` (renderuje tylko M02 + M04, NIE macierze — M03 ze stawkami nie zależy od danych M01), a edycja stawek w M03 odświeża tylko M04 (`P.renderM04(P.simulate())`), bez przebudowy macierzy M03. Pełne `P.update()` (przebudowa macierzy) tylko przy zmianie struktury: dodanie/usunięcie budynku lub miesiąca.
 
@@ -59,9 +59,9 @@ Pod spodem nadal żyje model `records[]`: komórka mapuje się na rekord CO (`gj
 
 ## Moduł 02 — zużycie (9 wielkości)
 
-Wykres słupkowy dla **jednego budynku** (własny select `state.m02Building`) po zakresie miesięcy M01. Jeden select (`#kz-m02-metric`, stan `state.m02Metric`) wybiera jedną z 9 wielkości zdefiniowanych w `P.M02_METRICS` ([js/kz.config.js](js/kz.config.js)): CO‑wskaźnik [GJ/m²], CO‑zużycie [GJ], **CO‑koszt [zł]**, CWU‑wskaźnik [GJ/m³], CWU‑zużycie [GJ], CWU‑woda [m³], **CWU‑koszt [zł]**, **Cena ciepła [zł/GJ]**, **Temperatura zewn. [°C]**. Każda metryka ma `{ medium, field, label, unit }`, gdzie `field` to `'intensity'` (GJ/dzielnik), `'gj'`, `'qty'`, `'cost'` (GJ × cena), `'price'` (cena ciepła — wartość globalna z `P.prices`, niezależna od budynku/zużycia) lub `'temp'` (temperatura — wartość globalna z `P.temps`; może być ≤ 0, więc wykres używa `opts.yMin` w `P._frame`, rysuje słupki w dół od wyróżnionej linii zera, bez prognozy „ogona"). Oś X = miesiące, jeden słupek na miesiąc, jeden kolor serii (`COLOR`), bez legendy. Metodę prognozy trzyma `state.m02Method` (na teraz tylko `'trend'`).
+Wykres słupkowy dla **jednego budynku** (własny select `state.m02Building`) po zakresie miesięcy M01. Jeden select (`#kz-m02-metric`, stan `state.m02Metric`) wybiera jedną z 9 wielkości zdefiniowanych w `P.M02_METRICS` ([js/kz.config.js](js/kz.config.js)): CO‑wskaźnik [GJ/m²], CO‑zużycie [GJ], **CO‑koszt [zł]**, CWU‑wskaźnik [GJ/m³], CWU‑zużycie [GJ], CWU‑woda [m³], **CWU‑koszt [zł]**, **Cena ciepła [zł/GJ]**, **Temperatura zewn. [°C]**. Każda metryka ma `{ medium, field, label, unit }`, gdzie `field` to `'intensity'` (GJ/dzielnik), `'gj'`, `'qty'`, `'cost'` (GJ × cena), `'price'` (cena ciepła — wartość globalna z `P.prices`, niezależna od budynku/zużycia) lub `'temp'` (temperatura — wartość globalna z `P.temps`; może być ≤ 0, więc wykres używa `opts.yMin` w `P._frame`, rysuje słupki w dół od wyróżnionej linii zera, bez prognozy „ogona"). Oś X = miesiące, jeden słupek na miesiąc, jeden kolor serii (`COLOR`), bez legendy.
 
-**Baza prognozy CWU** (`state.cwuBasis`, select `#kz-m02-basis`): `'intensity'` = `forecastGJ = trend(GJ/m³) × trend(m³)` (domyślnie; zob. `forecastIntensity` w [js/kz.estimate.js](js/kz.estimate.js)), `'gj'` = trend wprost na GJ. To **globalne ustawienie CWU** — zawsze aktywne (nie blokujemy go przy metryce CO; dla CO i tak nic nie zmienia, bo driver = stała powierzchnia, więc `trend(GJ/m²)×m² ≡ trend(GJ)`). **Wpływa na M04** (przestawia `P.forecastGJ` dla CWU → koszt i dobór zaliczek), dlatego listener w app.js woła pełne `P.update()`, nie sam `renderM02`. Stary plik JSON bez `cwuBasis` → `Object.assign` zachowuje domyślne `'intensity'`.
+**Sposób prognozy** wybierany **osobno per medium** (dwa selecty): **CO** (`#kz-m02-method-co`, stan `state.m02Method`) ma na teraz jedną pozycję `'trend'` — „Trend per miesiąc (GJ)". **CWU** (`#kz-m02-method-cwu`, stan `state.cwuBasis`) ma dwie: `'intensity'` = „Trend per miesiąc (GJ/m³ i m³)" → `forecastGJ = trend(GJ/m³) × trend(m³)` (domyślnie; zob. `forecastIntensity` w [js/kz.estimate.js](js/kz.estimate.js)), `'gj'` = „Trend per miesiąc (GJ i m³)" → trend wprost na GJ. Sposób CWU to **globalne ustawienie** — zawsze aktywne (nie blokujemy go przy metryce CO). **Wpływa na M04** (przestawia `P.forecastGJ` dla CWU → koszt i dobór zaliczek), dlatego listener w app.js woła pełne `P.update()`, nie sam `renderM02`. Stary plik JSON bez `cwuBasis` → `Object.assign` zachowuje domyślne `'intensity'`.
 
 Dane liczy `P.metricMatrix(metric)` w [js/kz.estimate.js](js/kz.estimate.js) (zwraca serie wszystkich budynków; render wybiera tylko aktywny): każda komórka ma status `actual` (jest rekord), `forecast` (pusty **„ogon"** — miesiąc po ostatnim z danymi dla budynku, policzalny trendem analogicznych miesięcy) albo `none` (luka/brak próbek → pomijana). „Pusty" miesiąc = brak GJ‑CO, GJ‑CWU **i** wody; cena nie jest kryterium. Słupki prognozy rysowane jaśniej + przerywanym obrysem; dodatkowo pionowa kreska **„prognoza →"** (przy pierwszej komórce `forecast`) i lekkie tło na prawo od niej oddzielają „ogon" prognozy od faktów. M02 nie korzysta z kursora „Teraz"/horyzontu (to dotyczy M03–M04) — granicą jest ostatni miesiąc z danymi per budynek.
 
@@ -87,7 +87,7 @@ Kontrolki M04:
 
 Wykresy znaczą też **granice okresów rozliczeniowych** (helper `periodMarks` + `P.isPeriodEnd(medium,y,m)`): pionowa kreska kropkowana na prawej krawędzi miesiąca kończącego okres (CO co 12 mies., CWU co 6 mies.; start z `state.periodStartCO`/`periodStartCWU`). Każdy widok jest jednomedialny, więc rysuje granice **tylko swojego medium** (`periodMarks(fr, months, slot, sim.medium)`).
 
-Górny pasek kontekstu zredukowany do przycisków stanu (Zapisz/Wczytaj/Wyczyść); dawne kontrolki „Teraz"/budynek/medium/horyzont oraz prawy sidebar zostały **usunięte**.
+Górny pasek kontekstu zredukowany do przycisków stanu (Wczytaj/Zapisz/Wyczyść); dawne kontrolki „Teraz"/budynek/medium/horyzont oraz prawy sidebar zostały **usunięte**.
 
 ## Konwencje
 

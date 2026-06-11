@@ -1,14 +1,15 @@
 /* =========================================================
    KALKULATOR-ZALICZEK — Model danych
 
-   Cztery magazyny (serializowalne do JSON przez persist.js):
+   Pięć magazynów (serializowalnych do JSON przez persist.js):
      P.records  — tablica rekordów zużycia miesięcznego
                   { id, building, medium, year, month, gj, qty }
                   qty = m² (CO, stałe dla budynku) lub m³ (CWU, zmienne)
      P.prices   — ceny ciepła ECO, klucz "RRRR-MM" → zł/GJ (wspólne)
      P.temps    — średnia temperatura zewnętrzna, klucz "RRRR-MM" → °C
                   (wspólna dla budynków; pomiar, więc BEZ carry-forward)
-     P.advances — zaplanowane zaliczki, klucz "budynek|medium|RRRR-MM" → zł/mies.
+     P.advances — stawki jednostkowe zaliczek ustalonych (M03),
+                  klucz "budynek|medium|RRRR-MM" → zł/m² (CO) lub zł/m³ (CWU)
      P.areas    — powierzchnia per budynek, klucz "budynek" → m² (CO)
                   Współdzielona przez wszystkie miesiące; synchronizowana z qty
                   rekordów CO (driver intensywności / przyszłej alokacji).

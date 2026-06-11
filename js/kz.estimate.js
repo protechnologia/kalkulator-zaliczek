@@ -99,10 +99,10 @@ window.KZ = window.KZ || {};
   //   • USTALONE — wpisane w M03 są nienaruszalne. Bierzemy ostatnią wpisaną
   //     i traktujemy wszystko do niej włącznie jako ustalone.
   //     Dziura między wpisanymi → uzupełniana stawką WCZEŚNIEJSZĄ (carry-forward).
-  //   • DOBIERANE — pusty „ogon" po ostatniej wpisanej stawce: jedna STAŁA stawka
-  //     trzymana do końca zakresu (= do końca okresu rozliczeniowego: CO rok,
-  //     CWU półrocze), dobrana tak, by zminimalizować różnicę Σzaliczek − Σkosztów
-  //     (saldo końcowe → 0).
+  //   • DOBIERANE — pusty „ogon" po ostatniej wpisanej stawce: stawka STAŁA
+  //     dobierana OSOBNO dla każdego okresu rozliczeniowego (CO rok, CWU półrocze),
+  //     tak by saldo Σzaliczek − Σkosztów → 0 na końcu KAŻDEGO okresu.
+  //     Ograniczona do ≥ 0 — nadwyżka z okresów historycznych nie jest odrabiana.
   // Budynek pokazywany w Module 04 (własny wybór; domyślnie pierwsza kolumna).
   P.m04Building = function() {
     const cols = P.m01ColBuildings();
@@ -237,10 +237,13 @@ window.KZ = window.KZ || {};
   }
 
   // Macierz WIELKOŚCI dla WSZYSTKICH budynków po widocznym zakresie miesięcy M01.
-  // metric = { medium:'CO'|'CWU', field:'intensity'|'gj'|'qty' }:
+  // metric = { medium:'CO'|'CWU', field:'intensity'|'gj'|'qty'|'cost'|'price'|'temp' }:
   //   'intensity' → GJ / dzielnik (powierzchnia dla CO, woda dla CWU)
   //   'gj'        → samo zużycie GJ
   //   'qty'       → zużycie wody [m³] (sensowne dla CWU)
+  //   'cost'      → koszt [zł] = GJ × cena ciepła
+  //   'price'     → cena ciepła [zł/GJ] — globalna z P.prices, niezależna od budynku
+  //   'temp'      → temperatura zewn. [°C] — globalna z P.temps; może być ≤ 0, bez prognozy
   // Dla każdej komórki: 'actual' (jest rekord), 'forecast' (pusty „ogon" po ostatnim
   // miesiącu z danymi, o ile da się policzyć trend) albo 'none' (brak / luka w środku).
   // Zwraca { months, buildings, series:[{ building, color, cells:[{year,month,status,value,gj,qty}] }], peak }.

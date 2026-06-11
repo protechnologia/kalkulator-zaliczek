@@ -6,8 +6,11 @@
      • kolumny (w bok)  = kolejne budynki   (przyciski: budynek z lewej / prawej)
      • nagłówek kolumny = nazwa budynku + powierzchnia [m²] (jedna na budynek)
      • komórka          = GJ na CO, GJ na CWU, m³ wody (per budynek/miesiąc)
+     • pierwsza kolumna = etykieta miesiąca + cena ciepła [zł/GJ] i temperatura
+                          zewnętrzna [°C] (jedna wartość na miesiąc, wspólna
+                          dla wszystkich budynków)
    Przy nadmiarze kolumn/wierszy kontener przewija się (sticky nagłówek i 1. kolumna).
-   Medium-agnostyczny: pokazuje wszystkie media naraz (przełącznik Medium dotyczy M02–M04).
+   Medium-agnostyczna: pokazuje wszystkie media naraz.
    ========================================================= */
 window.KZ = window.KZ || {};
 (function(P) {
