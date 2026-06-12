@@ -263,7 +263,25 @@ window.KZ = window.KZ || {};
   P.forecastQty = (b, med, monthId, year) => forecastField(b, med, monthId, year, 'qty');
 
   // Pojedyncza komórka miesiąca: fakt (jest rekord) albo prognoza albo brak.
+  // Jednostka łączna (P.MERGED): suma komórek WSZYSTKICH budynków z M01 — fakt
+  // lub prognoza liczona osobno per budynek (rwane zakresy danych budynków nie
+  // psują sumy). Status: 'none' gdy żaden budynek nic nie wnosi, 'forecast' gdy
+  // choć jedna składowa jest prognozą, inaczej 'actual'.
   P.monthCell = function(building, medium, year, month) {
+    if (building === P.MERGED) {
+      const price = P.getPrice(year, month);
+      let gj = 0, qty = 0, nAct = 0, nFc = 0;
+      P.m01ColBuildings().forEach(b => {
+        const c = P.monthCell(b, medium, year, month);
+        if (c.status === 'none') return;
+        gj += c.gj; qty += c.qty;
+        if (c.status === 'forecast') nFc++; else nAct++;
+      });
+      const status = (nAct + nFc) === 0 ? 'none' : nFc > 0 ? 'forecast' : 'actual';
+      const method = status === 'none' ? '—'
+                   : nFc === 0 ? 'fakt (suma)' : `suma: ${nAct} fakt + ${nFc} prognoza`;
+      return { year, month, status, gj, qty, price, cost: gj * price, method };
+    }
     const rec = P.getRecord(building, medium, year, month);
     const price = P.getPrice(year, month);
     if (rec) {
@@ -294,10 +312,15 @@ window.KZ = window.KZ || {};
   //     dobierana OSOBNO dla każdego okresu rozliczeniowego (CO rok, CWU półrocze),
   //     tak by saldo Σzaliczek − Σkosztów → 0 na końcu KAŻDEGO okresu.
   //     Ograniczona do ≥ 0 — nadwyżka z okresów historycznych nie jest odrabiana.
+  //
+  // Jednostka łączna: simulate(P.MERGED, med) bilansuje SUMĘ wszystkich budynków
+  // z M01 (koszt i driver z monthCell(P.MERGED), część ustalona = Σ kwot per budynek).
   // Budynek pokazywany w Module 04 (własny wybór; domyślnie pierwsza kolumna).
+  // P.MERGED (jednostka łączna) jest poprawnym wyborem, choć nie jest kolumną M01.
   P.m04Building = function() {
     const cols = P.m01ColBuildings();
     let b = P.state.m04Building;
+    if (b === P.MERGED) return cols.length ? P.MERGED : null;
     if (!b || !cols.includes(b)) b = cols.length ? cols[0] : null;
     P.state.m04Building = b;
     return b;
@@ -324,18 +347,41 @@ window.KZ = window.KZ || {};
     const driverOf = c => isCO ? P.getArea(b) : c.qty;       // m² (stałe) lub m³ wody
 
     // 1) Stawki wpisane w M03 + indeks OSTATNIEJ wpisanej.
-    const entered = win.map(w => P.getAdvance(b, med, w.year, w.month));   // null = brak
+    //    Jednostka łączna (P.MERGED): stawki w M03 żyją per budynek, więc czytamy
+    //    wpisy KAŻDEGO budynku; granicą części ustalonej jest ostatnia stawka
+    //    wpisana dla KTÓREGOKOLWIEK z nich.
+    const merged = b === P.MERGED;
+    const unitB  = merged ? P.m01ColBuildings() : [b];
+    const enteredBy = unitB.map(bb => win.map(w => P.getAdvance(bb, med, w.year, w.month)));  // null = brak
     let lastEntered = -1;
-    for (let i = 0; i < N; i++) if (entered[i] != null) lastEntered = i;
+    enteredBy.forEach(ent => { for (let i = 0; i < N; i++) if (ent[i] != null && i > lastEntered) lastEntered = i; });
 
-    // 2) Stawki ustalone: do ostatniej wpisanej włącznie; dziury = poprzednia (carry-forward).
-    const rate  = new Array(N).fill(null);
-    const fixed = new Array(N).fill(false);
-    let carry = null;
+    // 2) Część ustalona: do ostatniej wpisanej włącznie; dziury = poprzednia (carry-forward).
+    //    Liczona jako KWOTY per miesiąc (fixedAmt, zł) = Σ po budynkach jednostki
+    //    (stawka budynku × jego driver) — dla pojedynczego budynku to dokładnie
+    //    dawne stawka × driver. rate[] trzyma stawkę jednostkową do wykresów M04;
+    //    dla jednostki łącznej jest IMPLIKOWANA (kwota / driver łączny).
+    const rate     = new Array(N).fill(null);
+    const fixed    = new Array(N).fill(false);
+    const fixedAmt = new Array(N).fill(0);                   // zaliczka ustalona [zł]
+    unitB.forEach((bb, j) => {
+      const ent = enteredBy[j];
+      let carry = null;
+      for (let i = 0; i <= lastEntered; i++) {
+        if (ent[i] != null) carry = ent[i];
+        if (!merged) rate[i] = carry;          // null tylko gdy dziura przed pierwszą wpisaną
+        if (carry == null) continue;
+        const drv = isCO ? P.getArea(bb)
+                         : (merged ? P.monthCell(bb, med, win[i].year, win[i].month).qty : cells[i].qty);
+        fixedAmt[i] += carry * drv;
+      }
+    });
     for (let i = 0; i <= lastEntered; i++) {
-      if (entered[i] != null) carry = entered[i];
-      rate[i]  = carry;       // null tylko gdy dziura przed pierwszą wpisaną
       fixed[i] = true;
+      if (merged) {
+        const drv = driverOf(cells[i]);
+        rate[i] = drv > 0 ? fixedAmt[i] / drv : null;        // stawka implikowana
+      }
     }
 
     // 3) Dobór stawki dla „ogona" — OSOBNO dla każdego OKRESU ROZLICZENIOWEGO.
@@ -356,7 +402,7 @@ window.KZ = window.KZ || {};
         let a = acc.get(k);
         if (!a) { a = { cost: 0, advFixed: 0, driverTail: 0 }; acc.set(k, a); }
         a.cost += cells[i].cost;
-        if (i <= lastEntered) a.advFixed += (rate[i] != null ? rate[i] : 0) * driverOf(cells[i]);
+        if (i <= lastEntered) a.advFixed += fixedAmt[i];
         else                  a.driverTail += driverOf(cells[i]);
       }
       // stawka per okres + przypisanie do miesięcy ogona
@@ -385,7 +431,7 @@ window.KZ = window.KZ || {};
     let cumCost = 0, cumAdv = 0, prevK = null;
     cells.forEach((c, i) => {
       const driver   = driverOf(c);
-      const advTotal = (rate[i] != null) ? rate[i] * driver : 0;
+      const advTotal = fixed[i] ? fixedAmt[i] : ((rate[i] != null) ? rate[i] * driver : 0);
       const k = periodKey(win[i]);
       if (prevK !== null && k !== prevK) { cumCost = 0; cumAdv = 0; }   // nowy okres → reset
       prevK = k;

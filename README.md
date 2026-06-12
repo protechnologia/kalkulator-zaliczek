@@ -188,6 +188,17 @@ półrocze / 6 mies.).
    za dany okres. Skumulowany wykres koszt vs zaliczki (Moduł 04) **resetuje się
    na granicy każdego okresu** → kształt „ząbków".
 
+**Rozliczenie łączne.** Gdy kilka budynków nie jest rozliczanych indywidualnie,
+select budynku w Module 04 ma dodatkową pozycję **„Łącznie (wszystkie
+budynki)"** — zaliczki liczone są wtedy dla **sumy** wszystkich budynków
+z Modułu 01: koszt to suma kosztów per budynek (fakt lub prognoza liczona
+osobno dla każdego, więc różne zakresy danych budynków nie psują sumy), driver
+to suma powierzchni (CO) lub suma wody (CWU), a zaliczki ustalone to suma kwot
+wynikających z wpisów per budynek w Module 03 (granicą dobieranego „ogona" jest
+ostatnia stawka wpisana dla któregokolwiek budynku; stawka na wykresie „Stawki
+zaliczek" to w części ustalonej stawka implikowana = kwota / suma driverów).
+Moduły 01–03 pozostają per budynek.
+
 ## Założenia (łatwe do zmiany)
 
 - **Okres rozliczeniowy:** CO = 12 mies., CWU = 6 mies. Start okresu konfigurowalny

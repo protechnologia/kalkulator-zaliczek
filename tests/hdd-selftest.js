@@ -12,7 +12,9 @@
      5. ścieżka end-to-end: rekordy + temperatury → fitSignature →
         P.forecastGJ (jawna temperatura ma pierwszeństwo, lato → trend),
      6. P.tempForecast — temperatura zakładana przez sygnaturę (odwrócenie
-        HDD; maj–wrz i metoda 'trend' → null).
+        HDD; maj–wrz i metoda 'trend' → null),
+     7. jednostka łączna (P.MERGED) — suma budynków w M04: getArea, monthCell
+        (fakt i prognoza), simulate (kwoty ustalone + dobór zerujący saldo).
 
    Wynik: PASS/FAIL per test; exit code ≠ 0 przy jakiejkolwiek porażce.
    ========================================================= */
@@ -145,6 +147,60 @@ P.state.m02Method = 'trend';
 const ftr = P.forecastGJ('TEST', 'CO', 1, 2026);
 check('e2e: metoda trend → bez sygnatury', !!ftr && !ftr.method.includes('sygnatura'), ftr && ftr.method);
 check('temp: metoda trend → null', P.tempForecast(2026, 2) === null);
+
+// ---------- 7. Jednostka łączna (P.MERGED) — suma budynków w M04 ----------
+// Drugi budynek o DOKŁADNIE liniowej charakterystyce E = 10 + 0,10·HDD na tych
+// samych temperaturach → fit obu budynków jest dokładny, więc suma prognoz
+// jednostki łącznej też ma wartość analityczną.
+P.state.m02Method = 'hdd';
+[2022, 2023, 2024].forEach((season, si) => {
+  for (const m of [10, 11, 12, 1, 2, 3, 4]) {
+    const y = m >= 10 ? season : season + 1;
+    const T = BASE_T[m] + si * 0.5;
+    const hdd = Math.max(0, 15 - T) * daysInMonth(y, m);
+    P.records.push({ id: `TEST2|CO|${y}|${m}`, building: 'TEST2', medium: 'CO',
+                     year: y, month: m, gj: 10 + 0.10 * hdd, qty: 500 });
+  }
+});
+P.areas.TEST = 1000;
+P.areas.TEST2 = 500;
+P.state.m01Cols = null; P.state.m01From = null; P.state.m01To = null;   // re-seed układu z rekordów
+
+check('merged: getArea(P.MERGED) = Σ powierzchni (1500)', P.getArea(P.MERGED) === 1500, `a=${P.getArea(P.MERGED)}`);
+
+// komórka faktu = suma rekordów obu budynków
+const mc = P.monthCell(P.MERGED, 'CO', 2023, 1);
+const sum23 = P.getRecord('TEST', 'CO', 2023, 1).gj + P.getRecord('TEST2', 'CO', 2023, 1).gj;
+check('merged: monthCell fakt = suma GJ obu budynków', mc.status === 'actual' && near(mc.gj, sum23, 1e-9),
+      `gj=${mc.gj} vs ${sum23}`);
+
+// komórka prognozy: styczeń 2026 z jawną temp. −2 °C → HDD = 527
+//   TEST: 20 + 0,25·527 = 151,75; TEST2: 10 + 0,10·527 = 62,70 → suma 214,45
+const mf = P.monthCell(P.MERGED, 'CO', 2026, 1);
+check('merged: monthCell prognoza = suma prognoz (214,45 GJ)',
+      mf.status === 'forecast' && near(mf.gj, 214.45, 0.1), `status=${mf.status}, gj=${mf.gj}`);
+
+// sentinel nie może stać się nazwą budynku
+check('merged: guard nazwy w m01AddBuilding/m01RenameBuilding',
+      P.m01AddBuilding(P.MERGED) === false && P.m01RenameBuilding('TEST2', P.MERGED) === false);
+
+// m04Building zachowuje wybór sentinela (nie nadpisuje stanu pierwszą kolumną)
+P.state.m04Building = P.MERGED;
+check('merged: m04Building() zwraca P.MERGED', P.m04Building() === P.MERGED && P.state.m04Building === P.MERGED);
+
+// simulate(P.MERGED): stawka wpisana w JEDNYM budynku → kwota ustalona liczona
+// z JEGO driverem; dobór „ogona" zeruje saldo każdego okresu rozliczeniowego.
+P.prices[P.ymKey(2022, 10)] = 100;                       // cena carry-forward na cały zakres
+P.setAdvance('TEST', 'CO', 2022, 10, 2.0);               // 2 zł/m² tylko w TEST (1000 m²)
+const simM = P.simulate(P.MERGED, 'CO');
+const m0 = simM.months[0];
+check('merged: zaliczka ustalona = stawka × powierzchnia budynku (2000 zł)',
+      !!m0 && m0.fixed === true && near(m0.advTotal, 2000, 1e-9), m0 && `adv=${m0.advTotal}`);
+check('merged: stawka implikowana = kwota / Σdriver (1,333 zł/m²)',
+      !!m0 && near(m0.rate, 2000 / 1500, 1e-9), m0 && `r=${m0.rate}`);
+check('merged: dobór zeruje saldo (overshoot ≈ 0)', near(simM.overshoot, 0, 1e-6), `o=${simM.overshoot}`);
+check('merged: jest dobrany ogon', simM.firstComputed === 1 && simM.flatRates.length > 0,
+      `first=${simM.firstComputed}`);
 
 // ---------- wynik ----------
 console.log(failed ? `\n${failed} TEST(ÓW) NIE PRZESZŁO` : '\nWSZYSTKIE TESTY PRZESZŁY');

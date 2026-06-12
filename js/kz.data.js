@@ -181,7 +181,12 @@ window.KZ = window.KZ || {};
 
   // ===== POWIERZCHNIA (per budynek) =====
   // Jedna wartość m² na budynek; synchronizowana z qty rekordów CO tego budynku.
-  P.getArea = function(building) { return P.areas[building] != null ? P.areas[building] : 0; };
+  // Jednostka łączna (P.MERGED) → suma powierzchni wszystkich kolumn M01.
+  P.getArea = function(building) {
+    if (building === P.MERGED)
+      return P.m01ColBuildings().reduce((s, b) => s + (P.areas[b] != null ? P.areas[b] : 0), 0);
+    return P.areas[building] != null ? P.areas[building] : 0;
+  };
   P.setArea = function(building, val) {
     const v = (val === '' || val == null || isNaN(val)) ? 0 : +val;
     P.areas[building] = v;
@@ -248,7 +253,7 @@ window.KZ = window.KZ || {};
   };
   P.m01AddBuilding = function(name, side) {
     name = (name || '').trim();
-    if (!name) return false;
+    if (!name || name === P.MERGED) return false;          // sentinel jednostki łącznej zarezerwowany
     P.m01EnsureLayout();
     if (P.state.m01Cols.includes(name)) return false;
     if (side === 'left') P.state.m01Cols.unshift(name); else P.state.m01Cols.push(name);
@@ -266,7 +271,7 @@ window.KZ = window.KZ || {};
   P.m01RenameBuilding = function(oldName, newName) {
     oldName = (oldName || '').trim();
     newName = (newName || '').trim();
-    if (!newName || newName === oldName) return false;
+    if (!newName || newName === oldName || newName === P.MERGED) return false;
     P.m01EnsureLayout();
     if (P.state.m01Cols.includes(newName)) return false;   // kolizja nazw
     P.state.m01Cols = P.state.m01Cols.map(b => b === oldName ? newName : b);

@@ -27,7 +27,8 @@ window.KZ = window.KZ || {};
     const cols = P.m01ColBuildings();
     const cur = P.state.m04Building;
     sel.innerHTML = cols.length
-      ? cols.map(b => `<option value="${esc(b)}" ${b === cur ? 'selected' : ''}>${esc(b)}</option>`).join('')
+      ? cols.map(b => `<option value="${esc(b)}" ${b === cur ? 'selected' : ''}>${esc(b)}</option>`).join('') +
+        `<option value="${esc(P.MERGED)}" ${cur === P.MERGED ? 'selected' : ''}>${esc(P.MERGED_LABEL)}</option>`
       : `<option value="">— brak —</option>`;
   }
 
@@ -65,7 +66,7 @@ window.KZ = window.KZ || {};
     const mediaLbl = P.MEDIA[sim.medium].label;
     const unit = sim.medium === 'CO' ? 'zł/m²' : 'zł/m³';
     const seriesCol = sim.medium === 'CO' ? COL_CO : COL_CWU;
-    let stat = sim, ctxTxt = b ? `— ${b} · ${P.MEDIA[sim.medium].full}` : '— brak budynku';
+    let stat = sim, ctxTxt = b ? `— ${P.unitLabel(b)} · ${P.MEDIA[sim.medium].full}` : '— brak budynku';
 
     // przy widokach zależnych od stawek dopisz dobrane stawki do kontekstu
     if (b && (kind === 'rate' || kind === 'cum')) {

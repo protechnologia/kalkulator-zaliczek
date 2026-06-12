@@ -44,6 +44,14 @@ window.KZ = window.KZ || {};
     CWU: { label: 'CWU', full: 'Ciepła woda użytkowa',  periodLen: 6,  unit: 'm³', qtyLabel: 'Woda',         intensityLabel: 'GJ/m³' }
   };
 
+  // „Jednostka łączna" — dodatkowa pozycja selecta budynku w Module 04: wszystkie
+  // budynki z M01 rozliczane jako JEDEN byt (suma kosztów, driverów i zaliczek).
+  // Sentinel nie jest budynkiem (bez rekordów i kolumny w M01); nie może zawierać
+  // znaku '|' (format kluczy P.advances) ani kolidować z nazwą budynku (guardy w data.js).
+  P.MERGED = '__laczne__';
+  P.MERGED_LABEL = 'Łącznie (wszystkie budynki)';
+  P.unitLabel = b => b === P.MERGED ? P.MERGED_LABEL : b;   // etykieta jednostki do UI
+
   // Paleta kolorów serii (budynki) — Moduł 02. Kolor budynku = pozycja w m01Cols.
   P.SERIES_COLORS = ['#2dd4bf', '#f59e0b', '#a78bfa', '#a3e635', '#f472b6',
                      '#38bdf8', '#fb923c', '#4ade80', '#e879f9', '#facc15'];
@@ -97,7 +105,7 @@ window.KZ = window.KZ || {};
     m02HddP:     80,                 // percentyl surowości zimy dla prognozy HDD (select #kz-m02-hdd-p: 50|70|80|90; na sumach sezonowych)
 
     // --- Moduł 04 (dobór zaliczek) ---
-    m04Building: null,               // budynek pokazywany na wykresie (własny wybór M04)
+    m04Building: null,               // budynek pokazywany na wykresie (własny wybór M04; P.MERGED = wszystkie budynki łącznie)
     m04View:     'co'                // widok wykresu (jednomedialny): adv_co|adv_cwu (zebrane zaliczki) | rate_co|rate_cwu (stawki) | co|cwu (koszt vs zaliczki)
   };
 
