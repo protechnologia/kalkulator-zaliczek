@@ -134,7 +134,7 @@ html, body { overflow-anchor: none; }
   z-index: 40;
   font-family: 'IBM Plex Mono', monospace;
 }
-.kz-toc.hidden { display: none; }
+.kz-toc.hidden { display: none !important; }    /* ukrycie wygrywa też z .force-show */
 .kz-toc-title {
   font-size: 9px;
   letter-spacing: 0.22em;
@@ -184,6 +184,7 @@ html, body { overflow-anchor: none; }
   .kz-toc { display: none; }
   .kz-toc.force-show { display: block; }
   .kz-toc-toggle { display: block; }
+  .kz-toc-toggle.hidden { display: none; }
 }
 @media (max-width: 720px) {
   .kz-header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px; }

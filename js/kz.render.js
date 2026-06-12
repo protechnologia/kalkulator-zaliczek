@@ -51,7 +51,7 @@ window.KZ = window.KZ || {};
   // (opts.yMin, domyślnie 0 — ujemny zakres potrzebuje np. temperatura).
   P._frame = function(yMax, nTicks, opts) {
     opts = opts || {};
-    const W = opts.W || 780, H = opts.H || 300;
+    const W = opts.W || 920, H = opts.H || 300;   // 920 = viewBox SVG w HTML (szersza treść bez TOC)
     const padL = opts.padL || 54, padR = opts.padR || 18, padT = opts.padT || 22, padB = opts.padB || 38;
     const cw = W - padL - padR, ch = H - padT - padB;
     const fmtY = opts.fmtY || P.fmt.pl0;          // formater etykiet osi Y (np. pl2 dla małych wskaźników)
