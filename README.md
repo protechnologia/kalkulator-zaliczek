@@ -1,4 +1,4 @@
-# Kalkulator zaliczek CO/CWU — v1.1.0
+# Kalkulator zaliczek CO/CWU — v1.2.0
 
 Planowanie miesięcznych zaliczek na centralne ogrzewanie (CO) i ciepłą wodę
 użytkową (CWU) dla budynków spółdzielni mieszkaniowej. Uruchamiany z `file://`
@@ -6,7 +6,7 @@ użytkową (CWU) dla budynków spółdzielni mieszkaniowej. Uruchamiany z `file:
 
 ## Uruchomienie
 
-Otwórz `kalkulator-zaliczek.v1.1.html` w przeglądarce. Folder `css/` i `js/`
+Otwórz `kalkulator-zaliczek.v1.2.html` w przeglądarce. Folder `css/` i `js/`
 muszą leżeć obok pliku HTML.
 
 ## Architektura
@@ -32,13 +32,14 @@ css/                            kolejność ładowania w HTML: tokens → layout
   kz.components.css             komponenty (macierze, wykresy, przyciski)
   kz.layout.css                 layout (nagłówek, moduły, kontrolki, stopka)
   kz.tokens.css                 zmienne (kolory, odstępy) — motyw jasny
-js/                             kolejność ładowania w HTML: config → climate → data → estimate → persist → render → render.mXX → app
+js/                             kolejność ładowania w HTML: config → climate → data → estimate → persist → vendor/exceljs → xlsx → render → render.mXX → app
   kz.app.js                     orkiestracja: update(), init(), listenery
   kz.climate.js                 klimatologia HDD per miasto (plik GENEROWANY przez tools/hdd-climate.js)
   kz.config.js                  namespace KZ, stałe, P.state
   kz.data.js                    magazyny records/prices/temps/advances/areas + CRUD
   kz.estimate.js                prognoza zużycia (trend / sygnatura HDD), simulate(), metricMatrix()
   kz.persist.js                 eksport/import JSON + autosave
+  kz.xlsx.js                    raport XLSX (exportXLSX): 2 arkusze zaliczek CO/CWU
   kz.render.js                  wspólne helpery (formatery, szkielet SVG)
   kz.render.m01.js              Moduł 01 — macierz danych
   kz.render.m02.js              Moduł 02 — zużycie (9 wielkości)
@@ -52,8 +53,10 @@ tests/
   hdd-selftest.js              samotest silnika sygnatury HDD (node tests/hdd-selftest.js)
 tools/
   hdd-climate.js               generator js/kz.climate.js z archiwum Open-Meteo (Node, deweloperski)
+vendor/
+  exceljs.min.js               zvendorowana lokalnie kopia ExcelJS 4.4.0 (Apache-2.0) — raport XLSX
 CLAUDE.md                        wskazówki dla Claude Code przy edycji repo
-kalkulator-zaliczek.v1.1.html   strona główna (na końcu pliku — kolejność <script>)
+kalkulator-zaliczek.v1.2.html   strona główna (na końcu pliku — kolejność <script>)
 README.md                        ten plik
 ```
 
@@ -198,6 +201,29 @@ wynikających z wpisów per budynek w Module 03 (granicą dobieranego „ogona" 
 ostatnia stawka wpisana dla któregokolwiek budynku; stawka na wykresie „Stawki
 zaliczek" to w części ustalonej stawka implikowana = kwota / suma driverów).
 Moduły 01–03 pozostają per budynek.
+
+## Raport XLSX
+
+Przycisk **Raport ⤓** w górnym pasku (obok Wczytaj/Zapisz/Wyczyść) pobiera plik
+`raport_zaliczki_RRRR-MM-DD.xlsx` z dwoma arkuszami: **Zaliczki CO** i **Zaliczki
+CWU**. Układ każdego arkusza:
+
+- **Wiersze = budynki** — kolejne kolumny M01, zawsze per budynek (gdy w Module 04
+  wybrano jednostkę łączną, raport i tak rozbija ją na osobne wiersze; każdy budynek
+  bilansuje własny okres niezależnie).
+- **Kolumny = nazwa budynku + miesięczne stawki zaliczek** (jednostkowe: CO
+  [zł/m²], CWU [zł/m³]) z `P.simulate()` (część ustalona z M03 + dobrany „ogon").
+  **Dobrane (oszacowane) stawki „ogona" mają lekko zielone tło**; stawki ustalone
+  w M03 zostają bez tła.
+- **Okno miesięcy:** od początku **obecnie trwającego okresu rozliczeniowego**
+  (okresu zawierającego **dziś** — realną bieżącą datę) do ostatniego miesiąca M01
+  włącznie. Ponieważ CO ma okres 12 mies., a CWU 6 mies., **początek bywa różny dla
+  CO i CWU**, koniec jest wspólny. Początek jest przycinany do zakresu M01.
+
+Implementacja: [js/kz.xlsx.js](js/kz.xlsx.js) (`P.exportXLSX` / `P.buildXLSX`), jedyny
+konsument biblioteki `window.ExcelJS` (zvendorowana lokalnie kopia
+`vendor/exceljs.min.js`, ExcelJS 4.4.0, Apache-2.0 — bundle UMD ładowany zwykłym
+`<script>`, bez CDN/fetch, działa offline z `file://`).
 
 ## Założenia (łatwe do zmiany)
 

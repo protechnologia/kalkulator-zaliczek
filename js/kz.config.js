@@ -15,7 +15,7 @@ window.KZ = window.KZ || {};
 (function(P) {
   'use strict';
 
-  P.VERSION = '1.1.0';
+  P.VERSION = '1.2.0';
 
   // 1 GJ = 277.78 kWh (stała fizyczna, gdyby była potrzebna do przeliczeń)
   P.KWH_PER_GJ = 1000 / 3.6;

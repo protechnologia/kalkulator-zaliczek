@@ -176,6 +176,8 @@ window.KZ = window.KZ || {};
 
     // --- TRWAŁOŚĆ ---
     document.getElementById('kz-export').addEventListener('click', () => P.exportJSON());
+    const reportBtn = document.getElementById('kz-report');
+    if (reportBtn) reportBtn.addEventListener('click', () => P.exportXLSX());
     const fileIn = document.getElementById('kz-import-file');
     document.getElementById('kz-import').addEventListener('click', () => fileIn.click());
     fileIn.addEventListener('change', () => {

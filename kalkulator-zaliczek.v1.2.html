@@ -25,7 +25,7 @@
       <div class="kz-subtitle">Planowanie zaliczek · Spółdzielnia Mieszkaniowa Opole</div>
     </div>
     <div class="kz-meta">
-      v1.1.0
+      v1.2.0
     </div>
   </div>
 
@@ -36,6 +36,7 @@
       <div class="kz-btn-row">
         <button class="kz-btn teal" id="kz-import">Wczytaj ↑</button>
         <button class="kz-btn" id="kz-export">Zapisz ↓</button>
+        <button class="kz-btn" id="kz-report">Raport ⤓</button>
         <button class="kz-btn" id="kz-reset">Wyczyść</button>
         <input type="file" id="kz-import-file" accept="application/json" style="display:none">
       </div>
@@ -197,7 +198,7 @@
   <!-- FOOTER -->
   <div class="kz-footer">
     <div class="status">EGIE.PL</div>
-    <div>KALKULATOR ZALICZEK · v1.1.0</div>
+    <div>KALKULATOR ZALICZEK · v1.2.0</div>
   </div>
 
 </div>
@@ -207,6 +208,8 @@
 <script src="js/kz.data.js"></script>
 <script src="js/kz.estimate.js"></script>
 <script src="js/kz.persist.js"></script>
+<script src="vendor/exceljs.min.js"></script>
+<script src="js/kz.xlsx.js"></script>
 <script src="js/kz.render.js"></script>
 <script src="js/kz.render.m01.js"></script>
 <script src="js/kz.render.m02.js"></script>
