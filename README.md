@@ -211,10 +211,21 @@ CWU**. Układ każdego arkusza:
 - **Wiersze = budynki** — kolejne kolumny M01, zawsze per budynek (gdy w Module 04
   wybrano jednostkę łączną, raport i tak rozbija ją na osobne wiersze; każdy budynek
   bilansuje własny okres niezależnie).
-- **Kolumny = nazwa budynku + miesięczne stawki zaliczek** (jednostkowe: CO
-  [zł/m²], CWU [zł/m³]) z `P.simulate()` (część ustalona z M03 + dobrany „ogon").
+- **Kolumny = nazwa budynku + stawki zaliczek pogrupowane w przedziały** (jednostkowe:
+  CO [zł/m²], CWU [zł/m³]) z `P.simulate()` (część ustalona z M03 + dobrany „ogon").
+  Kolejne miesiące o **tej samej stawce** (i tym samym statusie ustalona/dobrana) dla
+  **wszystkich** budynków scalają się w jedną kolumnę: nagłówek `RRRR.MM` (jeden miesiąc)
+  lub `RRRR.MM - RRRR.MM` (zakres). Nowa kolumna powstaje, gdy którykolwiek budynek zmienia
+  stawkę/status albo na granicy okresu rozliczeniowego (kolumna nie przekracza okresu).
   **Dobrane (oszacowane) stawki „ogona" mają lekko zielone tło**; stawki ustalone
   w M03 zostają bez tła.
+- **Wariant P50/P80 (tylko CO, metoda HDD):** gdy prognoza CO używa sygnatury
+  energetycznej (`m02Method = 'hdd'`), wyliczona stawka zależy od percentyla surowości
+  zimy — każda kolumna z dobraną stawką rozbija się wtedy na dwie: `P50` (mediana)
+  i `P80` (zalecany margines), policzone osobną symulacją na każdym percentylu.
+  Nagłówek jest wtedy **dwuwierszowy**: górny wiersz to data (scalona poziomo nad parą
+  `P50`/`P80`), dolny to `P50`/`P80`; kolumny pojedyncze mają datę scaloną pionowo przez
+  oba wiersze. Kolumny ustalone (M03) i cały arkusz CWU pozostają pojedyncze.
 - **Okno miesięcy:** od początku **obecnie trwającego okresu rozliczeniowego**
   (okresu zawierającego **dziś** — realną bieżącą datę) do ostatniego miesiąca M01
   włącznie. Ponieważ CO ma okres 12 mies., a CWU 6 mies., **początek bywa różny dla
