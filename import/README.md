@@ -29,7 +29,9 @@ ręcznie w UI przyciskiem **Wczytaj** — aplikacja nie referuje tych plików.
 | EA4/N03 · CC  | CH-11, CI-10/20/24 (Chełmska, Cieszyńska) — 4 | **2021-12**…2026-05 | od początku |
 | EA4/N06 · B5  | BI-05 (Bielska) — 1 | **2021-12**…2026-05 | od początku |
 
-Stawki zaliczek za **2026-06** ustawione ręcznie = 2026-05 we wszystkich plikach (spółdzielnia nie zmienia ich w trwającym czerwcu); poza tym `to: 2026-05`.
+Raporty sięgają `to: 2026-05`. Stawkę zaliczki za **2026-06** (trwający miesiąc, brak raportu)
+silnik powiela automatycznie z ostatniej dostępnej przez `carryAdvanceTo: '2026-06'` w configu
+(spółdzielnia nie zmienia stawki w trwającym miesiącu) — bez ręcznego dopisywania.
 
 ## Użycie
 
@@ -60,7 +62,11 @@ module.exports = {
   outFile: 'import-xxx.json',          // względem import/ lub ścieżka absolutna
   root: 'C:/.../Backup raportów miesiecznych',
   from: '2023-01', to: '2026-05',
+  carryAdvanceTo: '2026-06',           // opcjonalnie: powiel ostatnią stawkę na miesiące po `to`
+                                       // (trwający miesiąc bez raportu) — tylko advances
   validateAgainst: 'import-xxx.json',  // opcjonalnie: regresja nowego buildu vs wersja na dysku
+  mergedAdvances: true,                // opcjonalnie: węzeł rozliczany WSPÓLNĄ stawką →
+                                       // domyślny wybór M04 = „Łącznie (wszystkie budynki)"
   sources: [                            // można łączyć kilka węzłów w jeden plik
     { node: 'EA1/N01', buildings: [
         { name: 'GR-04', id: '4' },     // name = etykieta w aplikacji; id = DOKŁADNA wartość z R13
@@ -70,6 +76,20 @@ module.exports = {
   // state: { periodStartCO: 1 },        // opcjonalne nadpisania state UI
 };
 ```
+
+**`mergedAdvances`** (opcjonalna, domyślnie `false`): gdy węzeł ma **wspólną stawkę zaliczki**
+liczoną dla sumy wszystkich budynków, ustaw `mergedAdvances: true`. Silnik zapisze w stanie
+`m04Building: '__laczne__'` (sentinel `P.MERGED`), więc po wczytaniu Moduł 04 od razu pokazuje
+jednostkę łączną i dobiera **jedną** stawkę „ogona" dla całego węzła (zamiast per budynek).
+Macierze M01–M03 zostają per budynek — flaga dotyczy tylko domyślnego widoku/doboru w M04.
+Równoważnik ręczny: `state: { m04Building: '__laczne__' }` (`cfg.state` ma pierwszeństwo).
+
+**`carryAdvanceTo`** (opcjonalna): po zbudowaniu zakresu `from…to` silnik powiela **ostatnią
+dostępną stawkę** każdego budynku (per medium CO/CWU) na każdy miesiąc **ściśle po `to`** aż do
+wskazanego (np. `'2026-06'`). Dotyka **tylko `advances`** — żadnych rekordów/cen/temperatur dla
+tych miesięcy (raportu jeszcze nie ma). Dzięki temu build jest w pełni odtwarzalny i nie trzeba
+ręcznie dopisywać stawki za trwający miesiąc. Budynek bez żadnej stawki w zakresie → pomijany
+(nie wymyślamy wartości).
 
 ### Kluczowe zasady
 

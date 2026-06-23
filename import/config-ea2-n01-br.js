@@ -13,6 +13,7 @@ module.exports = {
   root: 'C:/_GDrive/Dokumenty/eGIE/Wdrożenia/SM Opole/Dokumenty/Backup raportów miesiecznych',
   from: '2020-01', // raporty BR od 2020.01 (2018.01 to inny format „Okresowy raport" z innymi id — niekompatybilny)
   to:   '2026-05',
+  carryAdvanceTo: '2026-06', // powiel ostatnią stawkę na trwający miesiąc bez raportu (odtwarzalność)
   validateAgainst: 'import-ea2-n01-br.json', // regresja: nowy build vs wersja na dysku (budynki wspólne)
   sources: [
     {

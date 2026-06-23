@@ -1,7 +1,7 @@
 {
   "app": "kalkulator-zaliczek",
   "version": "1.0.0",
-  "savedAt": "2026-06-23T10:07:30.884Z",
+  "savedAt": "2026-06-23T11:22:59.785Z",
   "state": {
     "medium": "CO",
     "building": "CH-11",
@@ -30,7 +30,7 @@
     "hddCity": "opole",
     "m02HddP": 80,
     "cwuBasis": "intensity",
-    "m04Building": "CH-11",
+    "m04Building": "__laczne__",
     "m04View": "co"
   },
   "records": [

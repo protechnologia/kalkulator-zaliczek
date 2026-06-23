@@ -1,7 +1,7 @@
 {
   "app": "kalkulator-zaliczek",
   "version": "1.0.0",
-  "savedAt": "2026-06-23T09:44:21.682Z",
+  "savedAt": "2026-06-23T11:22:45.900Z",
   "state": {
     "medium": "CO",
     "building": "BR-14a",
@@ -33,11 +33,11 @@
     "m02Metric": "co_gj",
     "m02Building": "BR-14a",
     "m02Method": "hdd",
+    "hddCity": "opole",
+    "m02HddP": 80,
     "cwuBasis": "intensity",
     "m04Building": "BR-14a",
-    "m04View": "co",
-    "hddCity": "opole",
-    "m02HddP": 80
+    "m04View": "co"
   },
   "records": [
     {

@@ -171,6 +171,20 @@ function build(cfg){
     if(tCollect.length) temps[mo.key]=round1(tCollect.reduce((p,c)=>p+c,0)/tCollect.length);
   }
 
+  // Przeniesienie ostatniej stawki na miesiące PO `to` (np. trwający miesiąc bez raportu).
+  // Spółdzielnia nie zmienia stawki w trwającym miesiącu, a raportu jeszcze nie ma → kopiujemy
+  // ostatnią dostępną stawkę per budynek|medium. Dotyczy TYLKO advances (brak rekordów/cen/temp
+  // dla tych miesięcy). Czyni build w pełni odtwarzalnym (koniec ręcznego dopisywania 2026-06).
+  if(cfg.carryAdvanceTo){
+    const extra=monthsBetween(cfg.to,cfg.carryAdvanceTo).slice(1); // miesiące ściśle po `to`
+    for(const b of order) for(const med of ['CO','CWU']){
+      let last=null;
+      for(const mo of months){const k=`${b}|${med}|${mo.key}`;if(k in advances)last=advances[k];}
+      if(last===null)continue; // brak jakiejkolwiek stawki (np. stare miesiące) → nie wymyślamy
+      for(const mo of extra){const k=`${b}|${med}|${mo.key}`;if(!(k in advances))advances[k]=last;}
+    }
+  }
+
   // sort: źródło/budynek-major, miesiąc rosnąco, CO przed CWU; przenumerowanie id
   const medOrd={CO:0,CWU:1};
   records.sort((x,y)=>{
@@ -183,6 +197,11 @@ function build(cfg){
   const sortObj=o=>Object.fromEntries(Object.keys(o).sort().map(k=>[k,o[k]]));
 
   const lastY=parseYM(cfg.to).y;
+  // Jednostka łączna w M04: węzły rozliczane WSPÓLNĄ stawką (kalkulator → Budynek = „Łącznie").
+  // `mergedAdvances:true` w configu ustawia domyślny wybór M04 na sentinel P.MERGED ('__laczne__').
+  // cfg.state.m04Building (jeśli podane) i tak ma pierwszeństwo (Object.assign niżej).
+  const MERGED='__laczne__';
+  const m04Default=cfg.mergedAdvances?MERGED:order[0];
   const out={
     app:'kalkulator-zaliczek', version:'1.0.0', savedAt:new Date().toISOString(),
     state:Object.assign({
@@ -192,7 +211,7 @@ function build(cfg){
       m01From:{year:parseYM(cfg.from).y,month:parseYM(cfg.from).m},
       m01To:{year:lastY+1,month:12},
       m02Metric:'co_gj', m02Building:order[0], m02Method:'hdd', hddCity:'opole', m02HddP:80, cwuBasis:'intensity',
-      m04Building:order[0], m04View:'co'
+      m04Building:m04Default, m04View:'co'
     }, cfg.state||{}),
     records:recordsOut, prices:sortObj(prices), temps:sortObj(temps), advances:sortObj(advances),
     areas:Object.fromEntries(order.filter(b=>b in areas).map(b=>[b,areas[b]]))
