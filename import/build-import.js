@@ -4,9 +4,9 @@
  *
  * Użycie:
  *   node import/build-import.js <config> [--check]
- *     <config>   — ścieżka do configu, np. config-gr.js (WYMAGANY; bez niego lista dostępnych)
+ *     <config>   — ścieżka do configu, np. config-ea1-n01-gr.js (WYMAGANY; bez niego lista dostępnych)
  *     --check    — sam PREFLIGHT (mapowanie budynków + kotwice), bez zapisu pliku
- *   Konwencja nazw: config-<grupa>.js (config-gr.js, config-op.js, …) — jeden plik per grupa/węzeł.
+ *   Konwencja nazw: config-<węzeł>-<grupa>.js (config-ea1-n01-gr.js, config-ea2-n01-br.js, …) — jeden plik per grupa/węzeł.
  *
  * Działa OFFLINE, bez zależności (własny mini-czytnik xlsx). Node tylko do tego skryptu;
  * aplikacja go nie referuje — wynik wczytuje się ręcznie w UI (Wczytaj).
@@ -51,13 +51,39 @@ function anchors(cells){
     cena: findRowByLabel(cells,['I','J','K','A','B','C'], s=>s.includes('Cena ciepła zmienna')),
   };
 }
+// Kotwice OPCJONALNE: stawki zaliczek pojawiły się w raportach dopiero od 2020-07
+// (wcześniejsze raporty to czyste zużycie/koszty). Ich brak NIE jest błędem — wtedy
+// po prostu nie emitujemy advances dla danego miesiąca. Reszta kotwic jest wymagana.
+const OPTIONAL_ANCHORS=new Set(['advCO','advCWU']);
 
 /* ───────────────────────── ścieżki/iteracja ───────────────────────── */
 function parseYM(s){const m=String(s).match(/^(\d{4})-(\d{1,2})$/);if(!m)throw new Error('zła data: '+s);return{y:+m[1],m:+m[2]};}
 function monthsBetween(from,to){const a=parseYM(from),b=parseYM(to);const out=[];let y=a.y,m=a.m;while(y<b.y||(y===b.y&&m<=b.m)){out.push({y,m,key:`${y}-${String(m).padStart(2,'0')}`});m++;if(m>12){m=1;y++;}}return out;}
 // node "EA1/N01" → { ea:"EA1", prefix:"raport_pracy_ea1_n01" }
 function nodeParts(node){const ea=node.split('/')[0];const prefix='raport_pracy_'+node.toLowerCase().replace(/\//g,'_');return{ea,prefix};}
-function reportPath(root,node,y,m){const{ea,prefix}=nodeParts(node);const mm=String(m).padStart(2,'0');return `${root}/Raporty za ${y}.${mm}/ZWM/${ea}/${prefix}_${y}_${mm}.xlsx`;}
+function reportDir(root,node,y,m){const{ea}=nodeParts(node);const mm=String(m).padStart(2,'0');return `${root}/Raporty za ${y}.${mm}/ZWM/${ea}`;}
+// Nazwa pliku zmieniała się w czasie: ≥2023 „raport_pracy_ea1_n01_RRRR_MM.xlsx";
+// ≤2022 „Raport pracy węzłów - EA1-N01-GR - RRRR.MM.xlsx" (+ narastające „… RRRR.01-MM.xlsx" — POMIJAĆ).
+// Rozwiązujemy po LISTINGU folderu: bierzemy plik kończący się na RRRR_MM.xlsx lub RRRR.MM.xlsx
+// (oba jednoznacznie wskazują pojedynczy miesiąc; zakres „01-07" kończy się inaczej, więc odpada),
+// z pominięciem _ytd. Zwraca pełną ścieżkę albo null (brak pliku).
+function reportPath(root,node,y,m){
+  const dir=reportDir(root,node,y,m);
+  if(!fs.existsSync(dir))return null;
+  const mm=String(m).padStart(2,'0');
+  const sufNew=`_${y}_${mm}.xlsx`, sufOld=`${y}.${mm}.xlsx`;
+  // Katalog ZWM/EA<x> zawiera pliki WIELU węzłów (n01..n04) na ten sam miesiąc —
+  // filtruj po konkretnym węźle: nowy format „..._ea2_n02_...", stary „...-EA2-N02-...".
+  const tokNew=node.toLowerCase().replace(/\//g,'_'); // ea2_n02
+  const tokOld=node.toLowerCase().replace(/\//g,'-'); // ea2-n02
+  const files=fs.readdirSync(dir).filter(f=>{
+    const lf=f.toLowerCase();
+    if(!lf.endsWith('.xlsx')||lf.includes('ytd'))return false;
+    if(!(f.endsWith(sufNew)||f.endsWith(sufOld)))return false;
+    return lf.includes(tokNew)||lf.includes(tokOld);
+  });
+  return files.length?dir+'/'+files[0]:null;
+}
 
 /* ───────────────────────── PREFLIGHT ───────────────────────── */
 // Sprawdza na próbce miesięcy: czy każdy żądany `id` jest w R13, czy kotwice istnieją.
@@ -80,13 +106,15 @@ function preflight(cfg){
     console.log('\n— źródło: węzeł '+src.node+' —');
     for(const sm of sample){
       const f=reportPath(cfg.root,src.node,sm.y,sm.m);
-      if(!fs.existsSync(f)){console.log('  ['+sm.key+'] ✗ BRAK PLIKU: '+f);hard++;continue;}
+      if(!f){console.log('  ['+sm.key+'] ✗ BRAK PLIKU w: '+reportDir(cfg.root,src.node,sm.y,sm.m));hard++;continue;}
       const cells=loadCells(f);
       const map=r13Map(cells);
       const a=anchors(cells);
-      const missAnch=Object.entries(a).filter(([,v])=>v==null).map(([k])=>k);
+      const missReq=Object.entries(a).filter(([k,v])=>v==null&&!OPTIONAL_ANCHORS.has(k)).map(([k])=>k);
+      const missOpt=Object.entries(a).filter(([k,v])=>v==null&&OPTIONAL_ANCHORS.has(k)).map(([k])=>k);
       console.log('  ['+sm.key+'] dostępne id w R13: '+Object.keys(map).map(id=>id+'→'+map[id]).join('  '));
-      if(missAnch.length){console.log('           ✗ brak kotwic: '+missAnch.join(', '));hard++;}
+      if(missReq.length){console.log('           ✗ brak kotwic wymaganych: '+missReq.join(', '));hard++;}
+      if(missOpt.length){console.log('           ⚠ brak kotwic opcjonalnych (stawki — pominę te miesiące): '+missOpt.join(', '));}
       for(const b of src.buildings){
         const col=map[String(b.id)];
         console.log('           '+(col?'✓':'✗')+' '+b.name+'  id="'+b.id+'"  → '+(col||'BRAK W RAPORCIE!'));
@@ -111,11 +139,12 @@ function build(cfg){
     let priceSet=false;
     for(const src of cfg.sources){
       const f=reportPath(cfg.root,src.node,mo.y,mo.m);
-      if(!fs.existsSync(f)){issues.push(`${mo.key} [${src.node}]: BRAK PLIKU`);continue;}
+      if(!f){issues.push(`${mo.key} [${src.node}]: BRAK PLIKU`);continue;}
       const cells=loadCells(f);
       const map=r13Map(cells);
       const a=anchors(cells);
-      if(Object.values(a).some(x=>x==null)) issues.push(`${mo.key} [${src.node}]: brak kotwicy ${JSON.stringify(a)}`);
+      const missReq=Object.entries(a).filter(([k,v])=>v==null&&!OPTIONAL_ANCHORS.has(k)).map(([k])=>k);
+      if(missReq.length) issues.push(`${mo.key} [${src.node}]: brak wymaganych kotwic: ${missReq.join(', ')}`);
 
       // cena (wspólna na miesiąc) — z pierwszego źródła, które ją ma
       if(!priceSet && a.cena!=null){
@@ -162,7 +191,7 @@ function build(cfg){
       m01Cols:order.slice(),
       m01From:{year:parseYM(cfg.from).y,month:parseYM(cfg.from).m},
       m01To:{year:lastY+1,month:12},
-      m02Metric:'co_gj', m02Building:order[0], m02Method:'trend', cwuBasis:'intensity',
+      m02Metric:'co_gj', m02Building:order[0], m02Method:'hdd', hddCity:'opole', m02HddP:80, cwuBasis:'intensity',
       m04Building:order[0], m04View:'co'
     }, cfg.state||{}),
     records:recordsOut, prices:sortObj(prices), temps:sortObj(temps), advances:sortObj(advances),
@@ -193,8 +222,8 @@ function main(){
   const cfgArg=args.find(a=>!a.startsWith('--'));
   if(!cfgArg){
     const avail=fs.readdirSync(__dirname).filter(f=>/^config-.*\.js$/.test(f));
-    console.log('⛔ Podaj config, np.:  node import/build-import.js config-gr.js [--check]');
-    console.log('Dostępne configi:'+(avail.length?'\n  '+avail.join('\n  '):' (brak — utwórz config-<grupa>.js)'));
+    console.log('⛔ Podaj config, np.:  node import/build-import.js config-ea1-n01-gr.js [--check]');
+    console.log('Dostępne configi:'+(avail.length?'\n  '+avail.join('\n  '):' (brak — utwórz config-<węzeł>-<grupa>.js)'));
     process.exit(1);
   }
   // config szukany najpierw w import/ (sama nazwa), potem jako podana ścieżka
@@ -227,4 +256,5 @@ function main(){
   if(issues.length){console.log('\nPROBLEMY ('+issues.length+'):');issues.slice(0,30).forEach(s=>console.log('  -',s));if(issues.length>30)console.log('  … +'+(issues.length-30));}else console.log('\nBrak problemów.');
   if(cfg.validateAgainst){console.log();validate(out,refSnap,refLabel);}
 }
-main();
+if(require.main===module)main();
+else module.exports={loadCells,anchors,r13Map,colLetter,findRowByLabel,reportPath,reportDir,monthsBetween};

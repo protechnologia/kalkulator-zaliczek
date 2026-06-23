@@ -48,7 +48,9 @@ js/                             kolejność ładowania w HTML: config → climat
 docs/
   screenshot.png               zrzut ekranu (sekcja na końcu)
 import/
-  import_gr4_gr11.json         dane produkcyjne (budynki GR-04…GR-11) do wczytania
+  build-import.js              silnik importera (parser xlsx + preflight + build); zob. import/README.md
+  config-<węzeł>-<grupa>.js    konfiguracje zadań (12 węzłów SM Opole)
+  import-<węzeł>-<grupa>.json  dane produkcyjne 12 węzłów (EA1…EA4, 2020/2021-2026) do wczytania
 tests/
   hdd-selftest.js              samotest silnika sygnatury HDD (node tests/hdd-selftest.js)
 tools/

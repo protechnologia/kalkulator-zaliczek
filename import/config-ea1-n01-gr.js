@@ -1,18 +1,18 @@
 'use strict';
 /*
  * Config importu — SM Opole, węzeł EA1/N01 (grupa „G. Row." → budynki GR-04…GR-11).
- * Uruchom:  node import/build-import.js config-gr.js              (build + walidacja)
- *           node import/build-import.js config-gr.js --check       (sam preflight)
+ * Uruchom:  node import/build-import.js config-ea1-n01-gr.js              (build + walidacja)
+ *           node import/build-import.js config-ea1-n01-gr.js --check       (sam preflight)
  *
  * Każdy `id` to DOKŁADNA wartość z wiersza 13 raportu (preflight wypisze dostępne id).
- * Nowa grupa/węzeł → osobny plik `config-<grupa>.js` (np. config-op.js z id "1","2","7",…).
+ * Nowa grupa/węzeł → osobny plik `config-<węzeł>-<grupa>.js` (np. config-ea3-n03-op.js).
  */
 module.exports = {
-  outFile: 'import_gr4_gr11.json',
+  outFile: 'import-ea1-n01-gr.json',
   root: 'C:/_GDrive/Dokumenty/eGIE/Wdrożenia/SM Opole/Dokumenty/Backup raportów miesiecznych',
-  from: '2023-01',
+  from: '2020-01', // najwcześniejsze raporty na dysku: 2015-01 (można zejść niżej w razie potrzeby)
   to:   '2026-05',
-  validateAgainst: 'import_gr4_gr11.json', // regresja: nowy build vs wersja na dysku (budynki wspólne)
+  validateAgainst: 'import-ea1-n01-gr.json', // regresja: nowy build vs wersja na dysku (budynki wspólne)
   sources: [
     {
       node: 'EA1/N01',
